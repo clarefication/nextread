@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Pick Me Up — Your Next Read</title>
+  <title>Pick Me Up — Your Next Read (Beta)</title>
 
   <!--
   ╔══════════════════════════════════════════════════════╗
@@ -132,6 +132,22 @@
       flex-shrink: 0;
     }
     .topbar-brand:hover { color: var(--c-ink); }
+
+    .beta-badge {
+      font-family: var(--f-body);
+      font-size: 0.5rem;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--c-amber);
+      background: var(--c-amber-faint);
+      border: 1px solid rgba(212, 160, 84, 0.25);
+      border-radius: 100px;
+      padding: 2px 7px;
+      vertical-align: middle;
+      position: relative;
+      top: -1px;
+    }
 
     .topbar-nav.hidden { display: none; }
 
@@ -1478,7 +1494,7 @@
 
   <!-- Top bar -->
   <nav class="topbar">
-    <a class="topbar-brand" onclick="showView('home')">Pick Me Up</a>
+    <a class="topbar-brand" onclick="showView('home')">Pick Me Up <span class="beta-badge">Beta</span></a>
     <div class="topbar-nav hidden" id="topbarNav">
       <button class="nav-link active" data-view="home">Search</button>
       <button class="nav-link" data-view="saved">Reading List</button>
@@ -1509,7 +1525,7 @@
   <div class="welcome-overlay" id="welcomeOverlay" onclick="if(event.target===this)dismissWelcome()">
     <div class="welcome-card">
       <button class="login-close" onclick="dismissWelcome()">&times;</button>
-      <h2 class="welcome-title"><span style="font-style:italic;color:var(--c-amber)">Pick Me Up</span></h2>
+      <h2 class="welcome-title"><span style="font-style:italic;color:var(--c-amber)">Pick Me Up</span> <span class="beta-badge">Beta</span></h2>
       <p class="welcome-subtitle">Your Next Read</p>
       <div class="welcome-rule"></div>
       <p class="welcome-body">Everyone needs a pick-me-up sometimes. Ours just happen to come with pages. Tell us how you're feeling, and we'll find the book that meets you there — a quiet companion, a jolt of energy, or a world to disappear into.</p>
