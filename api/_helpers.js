@@ -23,6 +23,36 @@ function isConfidentMatch(doc, title, author) {
   return doc.title && fuzzyMatch(doc.title, title) && authorMatch(doc.author_name, author);
 }
 
+function matchScore(doc, title) {
+  if (!doc.title) return 0;
+  const normDoc = doc.title.toLowerCase().replace(/[^a-z0-9]/g, '');
+  const normQ   = title.toLowerCase().replace(/[^a-z0-9]/g, '');
+  let score = 0;
+  // Exact match is best
+  if (normDoc === normQ) score += 100;
+  // Shorter title distances are better (penalize compilations/box sets)
+  else score += Math.max(0, 50 - Math.abs(normDoc.length - normQ.length));
+  // Reward having a cover
+  if (doc.cover_i) score += 30;
+  // Reward having ISBNs
+  if (doc.isbn && doc.isbn.length > 1) score += 20;
+  // Reward having a rating
+  if (doc.ratings_average) score += 10;
+  return score;
+}
+
+function bestMatch(docs, title, author) {
+  const confident = docs.filter(d => isConfidentMatch(d, title, author));
+  if (confident.length > 0) {
+    return confident.sort((a, b) => matchScore(b, title) - matchScore(a, title))[0];
+  }
+  const fuzzy = docs.filter(d => d.title && fuzzyMatch(d.title, title) && d.author_name?.length);
+  if (fuzzy.length > 0) {
+    return fuzzy.sort((a, b) => matchScore(b, title) - matchScore(a, title))[0];
+  }
+  return null;
+}
+
 async function verifyBookExists(title, author) {
   try {
     const q = encodeURIComponent(`${title} ${author}`);
@@ -86,8 +116,7 @@ async function lookupBook(title, author) {
 
       if (!data?.docs?.length) continue;
 
-      const doc = data.docs.find(d => isConfidentMatch(d, title, author))
-                || data.docs.find(d => d.title && fuzzyMatch(d.title, title) && d.author_name?.length);
+      const doc = bestMatch(data.docs, title, author);
       if (!doc) continue;
 
       const isbns  = doc.isbn || [];

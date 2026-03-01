@@ -3,12 +3,12 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Next Read</title>
+  <title>Pick Me Up — Your Next Read</title>
 
   <!--
   ╔══════════════════════════════════════════════════════╗
-  ║                    NEXT READ                         ║
-  ║         Taste-Based Book Recommendations             ║
+  ║                  PICK ME UP                           ║
+  ║         Your Next Read — Book Recommendations        ║
   ╠══════════════════════════════════════════════════════╣
   ║  HOW TO RUN:                                         ║
   ║                                                      ║
@@ -73,7 +73,7 @@
       --ease: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
-    html { font-size: 16px; -webkit-font-smoothing: antialiased; scroll-behavior: smooth; }
+    html { font-size: 21.2px; -webkit-font-smoothing: antialiased; scroll-behavior: smooth; }
 
     body {
       background-color: var(--c-bg);
@@ -98,12 +98,26 @@
 
     /* ─── Top bar ───────────────────────────────────── */
     .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 100;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 28px 28px 0;
-      max-width: 800px;
-      margin: 0 auto;
+      padding: 14px 28px;
+      background: rgba(12, 11, 9, 0.85);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--c-border);
+    }
+
+    .topbar-nav {
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      align-items: center;
+      gap: 4px;
     }
 
     .topbar-brand {
@@ -112,6 +126,41 @@
       font-weight: 400;
       letter-spacing: 0.03em;
       color: var(--c-ink-soft);
+      cursor: pointer;
+      transition: color var(--ease);
+      text-decoration: none;
+      flex-shrink: 0;
+    }
+    .topbar-brand:hover { color: var(--c-ink); }
+
+    .topbar-nav.hidden { display: none; }
+
+    .nav-link {
+      font-family: var(--f-body);
+      font-size: 0.78rem;
+      font-weight: 400;
+      letter-spacing: 0.03em;
+      color: var(--c-ink-soft);
+      background: none;
+      border: none;
+      padding: 6px 14px;
+      border-radius: 100px;
+      cursor: pointer;
+      transition: all var(--ease);
+      white-space: nowrap;
+    }
+    .nav-link:hover {
+      color: var(--c-ink);
+      background: rgba(255,255,255,.04);
+    }
+    .nav-link.active {
+      color: var(--c-amber);
+      background: var(--c-amber-faint);
+    }
+
+    @media (max-width: 640px) {
+      .topbar { padding: 10px 16px; }
+      .nav-link { font-size: 0.7rem; padding: 5px 10px; }
     }
 
     /* ─── Hero header ───────────────────────────────── */
@@ -145,15 +194,26 @@
       color: var(--c-amber);
     }
 
-    .hero-tagline {
-      margin-top: 20px;
+    .hero-sub {
+      margin-top: 14px;
       font-family: var(--f-display);
-      font-size: 1.25rem;
-      font-style: italic;
+      font-size: 1.5rem;
       font-weight: 400;
       color: var(--c-ink-mid);
+      letter-spacing: 0.02em;
+    }
+
+    .hero-tagline {
+      margin-top: 8px;
+      font-family: var(--f-display);
+      font-size: 1.1rem;
+      font-style: italic;
+      font-weight: 400;
+      color: var(--c-ink-soft);
       letter-spacing: 0.01em;
     }
+
+
 
     .hero-rule {
       width: 48px;
@@ -755,6 +815,12 @@
       color: var(--c-ink-soft);
       letter-spacing: 0.05em;
     }
+    .affiliate-disclaimer {
+      margin-top: 10px;
+      font-size: 0.68rem;
+      color: var(--c-ink-faint);
+      letter-spacing: 0.02em;
+    }
 
     /* ─── Toast ──────────────────────────────────────── */
     .toast {
@@ -776,6 +842,435 @@
     }
     .toast.show { opacity: 1; transform: translateY(0); }
 
+    /* ─── Welcome popup ─────────────────────────────── */
+    .welcome-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.6);
+      backdrop-filter: blur(4px);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+    .welcome-overlay.show { display: flex; }
+
+    .welcome-card {
+      background: var(--c-bg-card);
+      border: 1px solid var(--c-border);
+      border-radius: var(--r);
+      padding: 44px 40px 36px;
+      max-width: 440px;
+      width: 100%;
+      position: relative;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+      text-align: center;
+    }
+
+    .welcome-title {
+      font-family: var(--f-display);
+      font-size: 2.2rem;
+      font-weight: 400;
+      color: var(--c-ink);
+      margin-bottom: 4px;
+    }
+
+    .welcome-subtitle {
+      font-family: var(--f-display);
+      font-size: 1.15rem;
+      font-weight: 400;
+      color: var(--c-ink-mid);
+      margin-bottom: 0;
+    }
+
+    .welcome-rule {
+      width: 48px;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--c-amber-mid), transparent);
+      margin: 20px auto;
+    }
+
+    .welcome-body {
+      font-size: 0.92rem;
+      font-weight: 300;
+      line-height: 1.8;
+      color: var(--c-ink-mid);
+      margin-bottom: 28px;
+    }
+
+    .welcome-actions {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .welcome-enter { width: 100%; }
+
+    .welcome-dismiss-label {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.78rem;
+      font-weight: 300;
+      color: var(--c-ink-soft);
+      cursor: pointer;
+      user-select: none;
+    }
+    .welcome-dismiss-label input[type="checkbox"] {
+      accent-color: var(--c-amber);
+      cursor: pointer;
+    }
+
+    /* ─── View sections ───────────────────────────────── */
+    .view { display: none; }
+    .view.active { display: block; }
+
+    .view-header {
+      text-align: center;
+      padding: 48px 0 36px;
+    }
+    .view-header h2 {
+      font-family: var(--f-display);
+      font-size: 2.2rem;
+      font-weight: 400;
+      color: var(--c-ink);
+      margin-bottom: 8px;
+    }
+    .view-header p {
+      font-size: 0.95rem;
+      font-weight: 300;
+      color: var(--c-ink-mid);
+    }
+
+    .view-empty {
+      text-align: center;
+      padding: 48px 24px;
+      color: var(--c-ink-soft);
+      font-size: 0.95rem;
+      font-weight: 300;
+      line-height: 1.7;
+    }
+    .view-empty svg {
+      display: block;
+      margin: 0 auto 16px;
+      opacity: 0.3;
+    }
+
+    /* ─── Saved books grid ─────────────────────────────── */
+    .saved-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-bottom: 36px;
+    }
+    @media (max-width: 560px) { .saved-grid { grid-template-columns: 1fr; } }
+
+    .saved-card {
+      background: var(--c-bg-card);
+      border: 1px solid var(--c-border);
+      border-radius: var(--r);
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      transition: border-color var(--ease), box-shadow var(--ease);
+      position: relative;
+    }
+    .saved-card:hover {
+      border-color: var(--c-border-lt);
+      box-shadow: 0 4px 24px var(--c-shadow);
+    }
+
+    .saved-cover {
+      width: 80px;
+      height: 120px;
+      border-radius: 6px;
+      object-fit: cover;
+      background: var(--c-bg-dim);
+      margin-bottom: 14px;
+    }
+    .saved-cover-placeholder {
+      width: 80px;
+      height: 120px;
+      border-radius: 6px;
+      background: var(--c-bg-dim);
+      border: 1px solid var(--c-border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 14px;
+    }
+
+    .saved-info {
+      width: 100%;
+      min-width: 0;
+    }
+    .saved-title {
+      font-family: var(--f-display);
+      font-size: 1rem;
+      font-weight: 400;
+      color: var(--c-ink);
+      line-height: 1.3;
+      margin-bottom: 4px;
+    }
+    .saved-author {
+      font-size: 0.78rem;
+      font-weight: 300;
+      color: var(--c-ink-mid);
+      margin-bottom: 12px;
+    }
+    .saved-links {
+      display: flex;
+      gap: 8px;
+      justify-content: center;
+    }
+    .saved-link {
+      font-family: var(--f-body);
+      font-size: 0.62rem;
+      font-weight: 400;
+      letter-spacing: 0.03em;
+      color: var(--c-ink-soft);
+      text-decoration: none;
+      padding: 4px 12px;
+      border: 1px solid var(--c-border);
+      border-radius: 100px;
+      transition: all var(--ease);
+      white-space: nowrap;
+    }
+    .saved-link:hover {
+      color: var(--c-amber);
+      border-color: var(--c-amber-mid);
+      background: var(--c-amber-faint);
+    }
+
+    .saved-remove {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: none;
+      border: none;
+      color: var(--c-ink-faint);
+      cursor: pointer;
+      padding: 4px;
+      transition: color var(--ease);
+    }
+
+    .saved-type {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 0.68rem;
+      font-weight: 500;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      border-radius: 100px;
+      padding: 3px 10px;
+    }
+    .saved-type.type-like {
+      color: #C46B5E;
+      background: rgba(196, 107, 94, 0.08);
+    }
+    .saved-type.type-save {
+      color: var(--c-amber);
+      background: var(--c-amber-faint);
+    }
+
+    .saved-remove:hover { color: var(--c-err); }
+
+    /* ─── Preferences view ─────────────────────────────── */
+    .pref-section {
+      margin-bottom: 32px;
+    }
+    .pref-section-label {
+      display: block;
+      font-size: 0.68rem;
+      font-weight: 500;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--c-ink-soft);
+      margin-bottom: 12px;
+      text-align: center;
+    }
+
+    .pref-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      justify-content: center;
+    }
+
+    .pref-chip {
+      display: inline-flex;
+      align-items: center;
+      padding: 7px 16px;
+      border: 1px solid var(--c-border);
+      border-radius: 100px;
+      font-family: var(--f-body);
+      font-size: 0.82rem;
+      font-weight: 400;
+      color: var(--c-ink-mid);
+      background: transparent;
+      cursor: pointer;
+      transition: all var(--ease);
+      user-select: none;
+    }
+    .pref-chip:hover {
+      border-color: var(--c-ink-faint);
+      color: var(--c-ink);
+    }
+    .pref-chip.on-like {
+      border-color: var(--c-sage);
+      color: var(--c-sage);
+      background: var(--c-sage-faint);
+      font-weight: 500;
+    }
+    .pref-chip.on-dislike {
+      border-color: var(--c-err);
+      color: var(--c-err);
+      background: var(--c-err-bg);
+      font-weight: 500;
+    }
+
+    .pref-save-row {
+      display: flex;
+      justify-content: center;
+      margin-top: 8px;
+      margin-bottom: 48px;
+    }
+    .pref-save-btn {
+      font-family: var(--f-body);
+      font-size: 0.9rem;
+      font-weight: 500;
+      color: var(--c-bg);
+      background: var(--c-amber);
+      border: none;
+      border-radius: var(--r-sm);
+      padding: 12px 32px;
+      cursor: pointer;
+      transition: all var(--ease);
+    }
+    .pref-save-btn:hover {
+      background: #E0AD5E;
+      transform: translateY(-1px);
+      box-shadow: 0 8px 28px rgba(212, 160, 84, 0.3);
+    }
+    .pref-save-btn:disabled { opacity: .5; cursor: not-allowed; }
+
+    /* ─── History view ──────────────────────────────────── */
+    .history-list { margin-bottom: 36px; }
+
+    .history-item {
+      background: var(--c-bg-card);
+      border: 1px solid var(--c-border);
+      border-radius: var(--r);
+      margin-bottom: 12px;
+      overflow: hidden;
+      transition: border-color var(--ease);
+    }
+    .history-item:hover { border-color: var(--c-border-lt); }
+
+    .history-item-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 18px 20px;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .history-query {
+      flex: 1;
+      font-family: var(--f-display);
+      font-size: 1.05rem;
+      font-style: italic;
+      color: var(--c-ink);
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .history-meta {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-shrink: 0;
+    }
+    .history-date {
+      font-size: 0.72rem;
+      color: var(--c-ink-soft);
+      white-space: nowrap;
+    }
+    .history-count {
+      font-size: 0.68rem;
+      font-weight: 500;
+      color: var(--c-amber);
+      background: var(--c-amber-faint);
+      border-radius: 100px;
+      padding: 2px 10px;
+      white-space: nowrap;
+    }
+    .history-chevron {
+      color: var(--c-ink-faint);
+      transition: transform var(--ease);
+      flex-shrink: 0;
+    }
+    .history-item.expanded .history-chevron { transform: rotate(90deg); }
+
+    .history-body {
+      display: none;
+      padding: 0 20px 18px;
+      border-top: 1px solid var(--c-border);
+    }
+    .history-item.expanded .history-body { display: block; }
+
+    .history-books {
+      padding: 14px 0 8px;
+    }
+    .history-book {
+      display: flex;
+      align-items: baseline;
+      gap: 8px;
+      padding: 6px 0;
+      font-size: 0.9rem;
+    }
+    .history-book-title {
+      font-family: var(--f-display);
+      font-weight: 400;
+      color: var(--c-ink);
+      text-decoration: none;
+      transition: color var(--ease);
+    }
+    .history-book-title:hover {
+      color: var(--c-amber);
+    }
+    .history-book-author {
+      font-size: 0.82rem;
+      font-weight: 300;
+      color: var(--c-ink-mid);
+    }
+
+    .history-rerun {
+      font-family: var(--f-body);
+      font-size: 0.78rem;
+      font-weight: 400;
+      color: var(--c-amber);
+      background: var(--c-amber-faint);
+      border: 1px solid rgba(212, 160, 84, 0.2);
+      border-radius: 100px;
+      padding: 6px 16px;
+      cursor: pointer;
+      transition: all var(--ease);
+      margin-top: 8px;
+    }
+    .history-rerun:hover {
+      background: rgba(212, 160, 84, 0.15);
+      border-color: var(--c-amber-mid);
+    }
+
     /* ─── Spacer ─────────────────────────────────────── */
     .spacer { height: 36px; }
 
@@ -786,21 +1281,257 @@
     }
     .search-card  { animation: fadeUp 0.6s ease both 0.1s; }
     header        { animation: fadeUp 0.6s ease both 0s; }
+
+    /* ─── Auth topbar ──────────────────────────────── */
+    .topbar-auth {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .auth-badge {
+      font-size: 0.72rem;
+      font-weight: 400;
+      letter-spacing: 0.04em;
+      color: var(--c-ink-soft);
+      background: var(--c-bg-dim);
+      border: 1px solid var(--c-border);
+      border-radius: 100px;
+      padding: 4px 14px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 180px;
+    }
+
+    .auth-badge.signed-in {
+      color: var(--c-sage);
+      background: var(--c-sage-faint);
+      border-color: rgba(122, 154, 124, 0.25);
+    }
+
+    .btn-auth {
+      font-family: var(--f-body);
+      font-size: 0.72rem;
+      font-weight: 400;
+      letter-spacing: 0.04em;
+      color: var(--c-amber);
+      background: var(--c-amber-faint);
+      border: 1px solid rgba(212, 160, 84, 0.2);
+      border-radius: 100px;
+      padding: 5px 14px;
+      cursor: pointer;
+      transition: all var(--ease);
+      white-space: nowrap;
+    }
+    .btn-auth:hover {
+      background: rgba(212, 160, 84, 0.15);
+      border-color: var(--c-amber-mid);
+    }
+
+    /* ─── Login modal ──────────────────────────────── */
+    .login-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.6);
+      backdrop-filter: blur(4px);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+    .login-overlay.show { display: flex; }
+
+    .login-card {
+      background: var(--c-bg-card);
+      border: 1px solid var(--c-border);
+      border-radius: var(--r);
+      padding: 40px 36px 36px;
+      max-width: 400px;
+      width: 100%;
+      position: relative;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+    }
+
+    .login-close {
+      position: absolute;
+      top: 16px;
+      right: 20px;
+      background: none;
+      border: none;
+      color: var(--c-ink-soft);
+      font-size: 1.4rem;
+      cursor: pointer;
+      line-height: 1;
+      transition: color var(--ease);
+    }
+    .login-close:hover { color: var(--c-ink); }
+
+    .login-title {
+      font-family: var(--f-display);
+      font-size: 1.6rem;
+      font-weight: 400;
+      color: var(--c-ink);
+      margin-bottom: 10px;
+    }
+
+    .login-desc {
+      font-size: 0.9rem;
+      font-weight: 300;
+      color: var(--c-ink-mid);
+      line-height: 1.6;
+      margin-bottom: 24px;
+    }
+
+    .login-input {
+      width: 100%;
+      font-family: var(--f-body);
+      font-size: 1rem;
+      font-weight: 300;
+      color: var(--c-ink);
+      background: var(--c-bg-input);
+      border: 1px solid var(--c-border);
+      border-radius: var(--r-sm);
+      padding: 14px 16px;
+      outline: none;
+      transition: border-color var(--ease);
+      margin-bottom: 14px;
+    }
+    .login-input:focus { border-color: var(--c-amber-mid); }
+    .login-input::placeholder { color: var(--c-ink-soft); }
+
+    .login-submit { width: 100%; }
+
+    .login-status {
+      font-size: 0.85rem;
+      font-weight: 300;
+      color: var(--c-ink-mid);
+      text-align: center;
+      margin-top: 14px;
+      min-height: 1.4em;
+    }
+
+    /* ─── Personalization badge ─────────────────────── */
+    .personalized-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 0.68rem;
+      font-weight: 500;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--c-sage);
+      background: var(--c-sage-faint);
+      border-radius: 100px;
+      padding: 4px 12px;
+    }
+
+    /* ─── Card action buttons ──────────────────────── */
+    .card-actions {
+      display: flex;
+      gap: 8px;
+      margin-top: 18px;
+      padding-top: 16px;
+      border-top: 1px solid var(--c-border);
+    }
+
+    .card-action-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-family: var(--f-body);
+      font-size: 0.78rem;
+      font-weight: 400;
+      color: var(--c-ink-soft);
+      background: none;
+      border: 1px solid var(--c-border);
+      border-radius: 100px;
+      padding: 6px 14px;
+      cursor: pointer;
+      transition: all var(--ease);
+    }
+    .card-action-btn:hover {
+      border-color: var(--c-ink-faint);
+      color: var(--c-ink-mid);
+      background: rgba(255,255,255,.02);
+    }
+    .card-action-btn.active-like {
+      color: #C46B5E;
+      border-color: rgba(196, 107, 94, 0.3);
+      background: rgba(196, 107, 94, 0.08);
+    }
+    .card-action-btn.active-save {
+      color: var(--c-amber);
+      border-color: rgba(212, 160, 84, 0.3);
+      background: var(--c-amber-faint);
+    }
+
+    .card-action-btn svg {
+      width: 14px;
+      height: 14px;
+      flex-shrink: 0;
+    }
   </style>
 </head>
 <body>
 
   <!-- Top bar -->
-  <div class="topbar">
-    <span class="topbar-brand">Next Read</span>
+  <nav class="topbar">
+    <a class="topbar-brand" onclick="showView('home')">Pick Me Up</a>
+    <div class="topbar-nav hidden" id="topbarNav">
+      <button class="nav-link active" data-view="home">Search</button>
+      <button class="nav-link" data-view="saved">Reading List</button>
+      <button class="nav-link" data-view="preferences">Preferences</button>
+      <button class="nav-link" data-view="history">History</button>
+    </div>
+    <div class="topbar-auth" id="topbarAuth">
+      <span class="auth-badge" id="authBadge">Guest</span>
+      <button class="btn-auth" id="authBtn" onclick="showLoginUI()">Sign in to save &amp; sync</button>
+    </div>
+  </nav>
+
+  <!-- Login modal -->
+  <div class="login-overlay" id="loginOverlay" onclick="if(event.target===this)closeLoginUI()">
+    <div class="login-card">
+      <button class="login-close" onclick="closeLoginUI()">&times;</button>
+      <h2 class="login-title">Save your taste</h2>
+      <p class="login-desc">Sign in with your email to save likes, sync across devices, and get better recommendations over time.</p>
+      <form id="loginForm" onsubmit="handleLogin(event)">
+        <input type="email" id="loginEmail" class="login-input" placeholder="you@email.com" required autocomplete="email" />
+        <button type="submit" class="btn-primary login-submit" id="loginSubmitBtn">Send magic link</button>
+      </form>
+      <p class="login-status" id="loginStatus"></p>
+    </div>
+  </div>
+
+  <!-- Welcome popup -->
+  <div class="welcome-overlay" id="welcomeOverlay" onclick="if(event.target===this)dismissWelcome()">
+    <div class="welcome-card">
+      <button class="login-close" onclick="dismissWelcome()">&times;</button>
+      <h2 class="welcome-title"><span style="font-style:italic;color:var(--c-amber)">Pick Me Up</span></h2>
+      <p class="welcome-subtitle">Your Next Read</p>
+      <div class="welcome-rule"></div>
+      <p class="welcome-body">Everyone needs a pick-me-up sometimes. Ours just happen to come with pages. Tell us how you're feeling, and we'll find the book that meets you there — a quiet companion, a jolt of energy, or a world to disappear into.</p>
+      <div class="welcome-actions">
+        <button class="btn-primary welcome-enter" onclick="dismissWelcome()">Start browsing</button>
+        <label class="welcome-dismiss-label">
+          <input type="checkbox" id="welcomeDontShow"> Don't show this again
+        </label>
+      </div>
+    </div>
   </div>
 
   <div class="wrap">
 
+    <!-- Home view -->
+    <div class="view active" id="viewHome">
+
     <!-- Hero -->
     <header>
-      <span class="hero-eyebrow">a different kind of recommendation</span>
-      <h1>Next <span class="italic">Read</span></h1>
+      <span class="hero-eyebrow">when you need a lift, pick up a book</span>
+      <h1><span class="italic">Pick Me Up</span></h1>
+      <p class="hero-sub">Your Next Read</p>
       <p class="hero-tagline">Books chosen for you, not for everyone.</p>
       <div class="hero-rule"></div>
     </header>
@@ -822,13 +1553,13 @@
       <div class="filters-grid">
 
         <div class="filter-group">
-          <label for="minRating">Min Goodreads Rating</label>
+          <label for="minRating">Min Rating (Open Library)</label>
           <select id="minRating">
             <option value="">Any rating</option>
-            <option value="3.5">3.5+</option>
-            <option value="3.8">3.8+</option>
-            <option value="4.0" selected>4.0+</option>
-            <option value="4.2">4.2+</option>
+            <option value="3.0">3.0+</option>
+            <option value="3.5" selected>3.5+</option>
+            <option value="4.0">4.0+</option>
+            <option value="4.5">4.5+</option>
           </select>
         </div>
 
@@ -861,7 +1592,6 @@
         <div class="slider-row">
           <div class="slider-ends">
             <span class="slider-end">Light</span>
-            <span class="slider-mid">Tone</span>
             <span class="slider-end">Heavy</span>
           </div>
           <input type="range" id="tone" min="1" max="5" value="3">
@@ -870,7 +1600,6 @@
         <div class="slider-row" style="margin-bottom:0">
           <div class="slider-ends">
             <span class="slider-end">Fast-paced</span>
-            <span class="slider-mid">Pace</span>
             <span class="slider-end">Slow &amp; reflective</span>
           </div>
           <input type="range" id="pace" min="1" max="5" value="3">
@@ -879,7 +1608,7 @@
 
       <div class="actions">
         <button class="btn-primary" id="findBtn" onclick="findBooks()">
-          Find my next read
+          Pick me up
         </button>
         <button class="btn-ghost" onclick="surpriseMe()">
           Surprise me
@@ -912,18 +1641,546 @@
       <div id="lastResults"></div>
     </div>
 
-    <footer>Powered by Claude &middot; Books chosen with care, not by committee</footer>
+    </div><!-- /viewHome -->
+
+    <!-- Saved Books view -->
+    <div class="view" id="viewSaved">
+      <div class="view-header">
+        <h2>Reading List</h2>
+        <p>Books you've saved to read later</p>
+      </div>
+      <div id="savedContent"></div>
+    </div>
+
+    <!-- Preferences view -->
+    <div class="view" id="viewPreferences">
+      <div class="view-header">
+        <h2>Reading Preferences</h2>
+        <p>These shape your future recommendations</p>
+      </div>
+      <div id="preferencesContent"></div>
+    </div>
+
+    <!-- History view -->
+    <div class="view" id="viewHistory">
+      <div class="view-header">
+        <h2>Search History</h2>
+        <p>Your past searches and discoveries</p>
+      </div>
+      <div id="historyContent"></div>
+    </div>
+
+    <footer>
+      <p>Pick Me Up &middot; Books chosen with care, not by committee</p>
+      <p class="affiliate-disclaimer">As an Amazon Associate, I earn from qualifying purchases. Book links may be affiliate links.</p>
+    </footer>
 
   </div>
 
   <!-- Toast -->
   <div class="toast" id="toast"></div>
 
-  <script>
+  <script type="module">
+    import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+
+    /* ─── Supabase init ───────────────────────────────── */
+    let sb = null;
+    let sbSession = null;
+
+    async function initSupabase() {
+      try {
+        const res = await fetch('/api/config');
+        const { supabaseUrl, supabaseAnonKey } = await res.json();
+        if (!supabaseUrl || !supabaseAnonKey) return;
+
+        sb = createClient(supabaseUrl, supabaseAnonKey);
+
+        // Listen for auth changes
+        sb.auth.onAuthStateChange((event, session) => {
+          if (event === 'TOKEN_REFRESHED' || event === 'SIGNED_IN' || event === 'SIGNED_OUT' || event === 'USER_UPDATED' || event === 'INITIAL_SESSION') {
+            sbSession = session;
+            updateAuthUI();
+            // Close login modal on successful sign-in
+            if (event === 'SIGNED_IN' && session?.user && !session.user.is_anonymous) {
+              closeLoginUI();
+            }
+          }
+        });
+
+        // Try to restore existing session
+        const { data: { session }, error: sessionError } = await sb.auth.getSession();
+        // Ignore PKCE errors (stale code verifier after redirect)
+        if (sessionError && sessionError.message?.includes('code verifier')) {
+          // Session was already established via callback — just continue
+        } else if (sessionError) {
+          console.warn('Session error:', sessionError.message);
+        }
+        if (session) {
+          sbSession = session;
+        } else {
+          // Sign in anonymously
+          const { data } = await sb.auth.signInAnonymously();
+          sbSession = data.session;
+        }
+        updateAuthUI();
+      } catch {
+        // Supabase not configured — app works in legacy mode
+      }
+    }
+
+    function getAuthHeaders() {
+      if (!sbSession?.access_token) return {};
+      return { 'Authorization': `Bearer ${sbSession.access_token}` };
+    }
+
+    /* ─── Auth UI ──────────────────────────────────────── */
+    function updateAuthUI() {
+      const badge = document.getElementById('authBadge');
+      const btn = document.getElementById('authBtn');
+      const nav = document.getElementById('topbarNav');
+      if (!badge || !btn) return;
+
+      const isSignedIn = sbSession?.user && !sbSession.user.is_anonymous;
+
+      if (isSignedIn) {
+        badge.textContent = sbSession.user.email || 'Signed in';
+        badge.classList.add('signed-in');
+        btn.textContent = 'Log out';
+        btn.onclick = handleLogout;
+        if (nav) nav.classList.remove('hidden');
+      } else {
+        badge.textContent = 'Guest';
+        badge.classList.remove('signed-in');
+        btn.textContent = 'Sign in to save & sync';
+        btn.onclick = showLoginUI;
+        if (nav) nav.classList.add('hidden');
+        // If on a non-home view, go back to home
+        if (currentView !== 'home') showView('home');
+      }
+    }
+
+    function showLoginUI() {
+      document.getElementById('loginOverlay').classList.add('show');
+      document.getElementById('loginEmail').focus();
+    }
+
+    function closeLoginUI() {
+      document.getElementById('loginOverlay').classList.remove('show');
+      document.getElementById('loginStatus').textContent = '';
+      document.getElementById('loginEmail').value = '';
+    }
+
+    async function handleLogin(e) {
+      e.preventDefault();
+      const email = document.getElementById('loginEmail').value.trim();
+      if (!email) return;
+
+      const statusEl = document.getElementById('loginStatus');
+      const submitBtn = document.getElementById('loginSubmitBtn');
+
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Sending...';
+      statusEl.textContent = '';
+
+      // Store old anonymous user ID before sign-in
+      if (sbSession?.user?.is_anonymous) {
+        localStorage.setItem('nextread_old_anon_id', sbSession.user.id);
+      }
+
+      try {
+        const redirectTo = `${window.location.origin}/auth/callback.html`;
+        const { error } = await sb.auth.signInWithOtp({ email, options: { emailRedirectTo: redirectTo } });
+
+        if (error) throw error;
+
+        statusEl.style.color = 'var(--c-sage)';
+        statusEl.textContent = 'Check your email for a magic link!';
+        document.getElementById('loginEmail').value = '';
+      } catch (err) {
+        statusEl.style.color = 'var(--c-err)';
+        statusEl.textContent = err.message || 'Something went wrong. Try again.';
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Send magic link';
+      }
+    }
+
+    async function handleLogout() {
+      if (!sb) return;
+      await sb.auth.signOut();
+      sbSession = null;
+
+      // Sign in as new anonymous user
+      const { data } = await sb.auth.signInAnonymously();
+      sbSession = data.session;
+      showView('home');
+      updateAuthUI();
+      toast('Logged out');
+    }
+
+    /* ─── Welcome popup ─────────────────────────────────── */
+    function dismissWelcome() {
+      document.getElementById('welcomeOverlay').classList.remove('show');
+      if (document.getElementById('welcomeDontShow').checked) {
+        localStorage.setItem('pickmeup_welcome_dismissed', '1');
+      }
+    }
+    window.dismissWelcome = dismissWelcome;
+
+    // Expose to onclick handlers
+    window.showLoginUI = showLoginUI;
+    window.closeLoginUI = closeLoginUI;
+    window.handleLogin = handleLogin;
+
+    /* ─── View routing ─────────────────────────────────── */
+    let currentView = 'home';
+    const viewMap = { home: 'viewHome', saved: 'viewSaved', preferences: 'viewPreferences', history: 'viewHistory' };
+
+    function showView(name) {
+      if (!viewMap[name]) return;
+      currentView = name;
+
+      // Toggle view visibility
+      document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+      const target = document.getElementById(viewMap[name]);
+      if (target) target.classList.add('active');
+
+      // Update nav links
+      document.querySelectorAll('.nav-link').forEach(l => {
+        l.classList.toggle('active', l.dataset.view === name);
+      });
+
+      // Load data for the view
+      if (name === 'saved') loadSavedBooks();
+      else if (name === 'preferences') loadPreferences();
+      else if (name === 'history') loadHistory();
+
+      // Scroll to top
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+    window.showView = showView;
+
+    // Wire nav links
+    document.addEventListener('DOMContentLoaded', () => {
+      document.querySelectorAll('.nav-link').forEach(link => {
+        link.addEventListener('click', () => showView(link.dataset.view));
+      });
+    });
+
+    /* ─── Saved Books ──────────────────────────────────── */
+    const GENRE_LIST = ['Fiction', 'Non-fiction', 'Literary Fiction', 'Romance', 'Thriller', 'Mystery', 'Fantasy', 'Sci-fi', 'Historical', 'Essay Collection'];
+
+    async function loadSavedBooks() {
+      const container = document.getElementById('savedContent');
+      container.innerHTML = '<div class="view-empty">Loading...</div>';
+
+      try {
+        const res = await fetch('/api/saved-books', { headers: getAuthHeaders() });
+        if (!res.ok) throw new Error('Failed to load');
+        const { books } = await res.json();
+
+        if (!books.length) {
+          container.innerHTML = `
+            <div class="view-empty">
+              <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M19 21l-7-5-7 5V5a2 2 0 012-2h10a2 2 0 012 2z"/>
+              </svg>
+              <p>Your reading list is empty.<br>Hit "Save" on any book to add it here.</p>
+            </div>`;
+          return;
+        }
+
+        const grid = document.createElement('div');
+        grid.className = 'saved-grid';
+
+        books.forEach(b => {
+          const card = document.createElement('div');
+          card.className = 'saved-card';
+          const coverHtml = b.cover_url
+            ? `<img class="saved-cover" src="${esc(b.cover_url)}" alt="">`
+            : `<div class="saved-cover-placeholder"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--c-ink-faint)" stroke-width="1.3"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg></div>`;
+
+          const grSearch = `https://www.goodreads.com/search?q=${encodeURIComponent(b.title + ' ' + b.author)}`;
+          const amzSearch = `https://www.amazon.com/s?k=${encodeURIComponent(b.title + ' ' + b.author)}&i=stripbooks&tag=nextreadapp-22`;
+
+          card.innerHTML = `
+            ${coverHtml}
+            <div class="saved-info">
+              <div class="saved-title">${esc(b.title)}</div>
+              <div class="saved-author">by ${esc(b.author)}</div>
+              <div class="saved-links">
+                <a class="saved-link goodreads-link" href="${grSearch}" target="_blank" rel="noopener noreferrer">Goodreads &#x2197;</a>
+                <a class="saved-link amazon-link" href="${amzSearch}" target="_blank" rel="noopener noreferrer">Amazon &#x2197;</a>
+              </div>
+            </div>
+            <button class="saved-remove" title="Remove" data-book-id="${esc(b.book_id)}">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </button>
+          `;
+
+          card.querySelector('.saved-remove').addEventListener('click', async () => {
+            await recordInteraction(b.title, b.author, 'dislike', b.cover_url);
+            card.style.opacity = '0';
+            card.style.transform = 'scale(0.95)';
+            card.style.transition = 'all 0.25s ease';
+            setTimeout(() => { card.remove(); if (!grid.children.length) loadSavedBooks(); }, 280);
+            toast('Removed from saved');
+          });
+
+          grid.appendChild(card);
+        });
+
+        container.innerHTML = '';
+        container.appendChild(grid);
+
+        // Enrich covers
+        enrichSavedCovers(books, grid);
+      } catch {
+        container.innerHTML = '<div class="view-empty">Could not load saved books.</div>';
+      }
+    }
+
+    async function enrichSavedCovers(books, grid) {
+      try {
+        const res = await fetch('/api/books-meta', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ books: books.map(b => ({ title: b.title, author: b.author })) }),
+        });
+        if (!res.ok) return;
+        const { results } = await res.json();
+        const cards = grid.querySelectorAll('.saved-card');
+        results.forEach((data, i) => {
+          if (!cards[i]) return;
+          if (data.olCover) {
+            const placeholder = cards[i].querySelector('.saved-cover-placeholder');
+            if (placeholder) {
+              const img = document.createElement('img');
+              img.className = 'saved-cover';
+              img.src = data.olCover;
+              img.onload = () => placeholder.replaceWith(img);
+            }
+          }
+          const isbn = data.isbn13 || data.isbn10;
+          if (isbn) {
+            const grLink = cards[i].querySelector('.goodreads-link');
+            const amzLink = cards[i].querySelector('.amazon-link');
+            if (grLink) grLink.href = `https://www.goodreads.com/book/isbn/${isbn}`;
+            if (amzLink) amzLink.href = `https://www.amazon.com/dp/${data.isbn10 || data.isbn13}?tag=nextreadapp-22`;
+          }
+        });
+      } catch { /* non-fatal */ }
+    }
+
+    /* ─── Preferences ──────────────────────────────────── */
+    async function loadPreferences() {
+      const container = document.getElementById('preferencesContent');
+      container.innerHTML = '<div class="view-empty">Loading...</div>';
+
+      try {
+        const res = await fetch('/api/me', { headers: getAuthHeaders() });
+        if (!res.ok) throw new Error('Failed to load');
+        const { preferences } = await res.json();
+
+        const likesSet = new Set(preferences.likes_genres || []);
+        const dislikesSet = new Set(preferences.dislikes_genres || []);
+
+        function renderChips(set, cls) {
+          return GENRE_LIST.map(g => {
+            const isOn = set.has(g);
+            return `<button class="pref-chip ${isOn ? cls : ''}" data-genre="${esc(g)}">${esc(g)}</button>`;
+          }).join('');
+        }
+
+        container.innerHTML = `
+          <div class="pref-section">
+            <span class="pref-section-label">Genres I enjoy</span>
+            <div class="pref-chips" id="prefLikes">${renderChips(likesSet, 'on-like')}</div>
+          </div>
+          <div class="pref-section">
+            <span class="pref-section-label">Genres I'd rather avoid</span>
+            <div class="pref-chips" id="prefDislikes">${renderChips(dislikesSet, 'on-dislike')}</div>
+          </div>
+          <div class="pref-save-row">
+            <button class="pref-save-btn" id="prefSaveBtn">Save preferences</button>
+          </div>
+        `;
+
+        // Wire chip toggles
+        container.querySelectorAll('#prefLikes .pref-chip').forEach(chip => {
+          chip.addEventListener('click', () => {
+            chip.classList.toggle('on-like');
+            // If liking, remove from dislikes
+            if (chip.classList.contains('on-like')) {
+              const twin = container.querySelector(`#prefDislikes .pref-chip[data-genre="${chip.dataset.genre}"]`);
+              if (twin) twin.classList.remove('on-dislike');
+            }
+          });
+        });
+        container.querySelectorAll('#prefDislikes .pref-chip').forEach(chip => {
+          chip.addEventListener('click', () => {
+            chip.classList.toggle('on-dislike');
+            if (chip.classList.contains('on-dislike')) {
+              const twin = container.querySelector(`#prefLikes .pref-chip[data-genre="${chip.dataset.genre}"]`);
+              if (twin) twin.classList.remove('on-like');
+            }
+          });
+        });
+
+        // Save
+        document.getElementById('prefSaveBtn').addEventListener('click', savePreferences);
+      } catch {
+        container.innerHTML = '<div class="view-empty">Could not load preferences.</div>';
+      }
+    }
+
+    async function savePreferences() {
+      const btn = document.getElementById('prefSaveBtn');
+      btn.disabled = true;
+      btn.textContent = 'Saving...';
+
+      const likes = [...document.querySelectorAll('#prefLikes .pref-chip.on-like')].map(c => c.dataset.genre);
+      const dislikes = [...document.querySelectorAll('#prefDislikes .pref-chip.on-dislike')].map(c => c.dataset.genre);
+
+      try {
+        const res = await fetch('/api/preferences', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
+          body: JSON.stringify({ likes_genres: likes, dislikes_genres: dislikes }),
+        });
+        if (!res.ok) throw new Error('Failed');
+        toast('Preferences saved');
+      } catch {
+        toast('Could not save preferences');
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Save preferences';
+      }
+    }
+
+    /* ─── History ──────────────────────────────────────── */
+    function relativeTime(dateStr) {
+      const diff = Date.now() - new Date(dateStr).getTime();
+      const mins = Math.floor(diff / 60000);
+      if (mins < 1) return 'just now';
+      if (mins < 60) return `${mins}m ago`;
+      const hrs = Math.floor(mins / 60);
+      if (hrs < 24) return `${hrs}h ago`;
+      const days = Math.floor(hrs / 24);
+      if (days < 7) return `${days}d ago`;
+      return new Date(dateStr).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    }
+
+    async function loadHistory() {
+      const container = document.getElementById('historyContent');
+      container.innerHTML = '<div class="view-empty">Loading...</div>';
+
+      try {
+        const res = await fetch('/api/history', { headers: getAuthHeaders() });
+        if (!res.ok) throw new Error('Failed to load');
+        const { searches } = await res.json();
+
+        if (!searches.length) {
+          container.innerHTML = `
+            <div class="view-empty">
+              <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+              </svg>
+              <p>No search history yet.<br>Your past searches will appear here.</p>
+            </div>`;
+          return;
+        }
+
+        const list = document.createElement('div');
+        list.className = 'history-list';
+
+        searches.forEach(s => {
+          const bookCount = Array.isArray(s.results) ? s.results.length : 0;
+          const item = document.createElement('div');
+          item.className = 'history-item';
+
+          let booksHtml = '';
+          if (Array.isArray(s.results) && s.results.length) {
+            booksHtml = s.results.map(b => `
+              <div class="history-book">
+                <a class="history-book-title" href="https://www.amazon.com/s?k=${encodeURIComponent(b.title + ' ' + b.author)}&i=stripbooks&tag=nextreadapp-22" target="_blank" rel="noopener noreferrer">${esc(b.title)}</a>
+                <span class="history-book-author">by ${esc(b.author)}</span>
+              </div>
+            `).join('');
+          }
+
+          item.innerHTML = `
+            <div class="history-item-header">
+              <span class="history-query">\u201C${esc(s.query_text)}\u201D</span>
+              <div class="history-meta">
+                <span class="history-date">${relativeTime(s.created_at)}</span>
+                ${bookCount ? `<span class="history-count">${bookCount} books</span>` : ''}
+                <svg class="history-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg>
+              </div>
+            </div>
+            <div class="history-body">
+              <div class="history-books">${booksHtml}</div>
+              <button class="history-rerun">Search again</button>
+            </div>
+          `;
+
+          // Toggle expand + enrich links on first open
+          let enriched = false;
+          item.querySelector('.history-item-header').addEventListener('click', () => {
+            item.classList.toggle('expanded');
+            if (!enriched && item.classList.contains('expanded') && Array.isArray(s.results) && s.results.length) {
+              enriched = true;
+              enrichHistoryLinks(s.results, item);
+            }
+          });
+
+          // Search again
+          item.querySelector('.history-rerun').addEventListener('click', () => {
+            rerunSearch(s.query_text);
+          });
+
+          list.appendChild(item);
+        });
+
+        container.innerHTML = '';
+        container.appendChild(list);
+      } catch {
+        container.innerHTML = '<div class="view-empty">Could not load search history.</div>';
+      }
+    }
+
+    async function enrichHistoryLinks(books, item) {
+      try {
+        const res = await fetch('/api/books-meta', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ books: books.map(b => ({ title: b.title, author: b.author })) }),
+        });
+        if (!res.ok) return;
+        const { results } = await res.json();
+        const links = item.querySelectorAll('.history-book-title');
+        results.forEach((data, i) => {
+          if (!links[i]) return;
+          const isbn = data.isbn10 || data.isbn13;
+          if (isbn) {
+            links[i].href = `https://www.amazon.com/dp/${isbn}?tag=nextreadapp-22`;
+          }
+        });
+      } catch { /* non-fatal */ }
+    }
+
+    function rerunSearch(queryText) {
+      showView('home');
+      const textarea = document.getElementById('moodInput');
+      textarea.value = queryText;
+      textarea.focus();
+      findBooks();
+    }
+
     /* ─── State ───────────────────────────────────────── */
     const genres = new Set();
     const HISTORY_KEY = 'nextread_history';
-    const HISTORY_MAX = 60; // remember last 60 books to avoid repeats
+    const HISTORY_MAX = 60;
 
     function getPastRecommendations() {
       try { return JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]'); }
@@ -933,17 +2190,16 @@
     function savePastRecommendations(books) {
       const history = getPastRecommendations();
       books.forEach(b => {
-        // Avoid duplicate entries in history
         if (!history.some(h => h.title.toLowerCase() === b.title.toLowerCase())) {
           history.push({ title: b.title, author: b.author });
         }
       });
-      // Keep only the most recent entries
       while (history.length > HISTORY_MAX) history.shift();
       localStorage.setItem(HISTORY_KEY, JSON.stringify(history));
     }
 
     const SURPRISE = [
+      // Original 12
       "Something that feels like a rainy Sunday afternoon \u2014 quiet, a little bittersweet, no rush to get anywhere",
       "A book I can disappear into completely. Takes me somewhere else and makes me forget my own life for a few hours",
       "Something sharp and witty but with real emotional weight underneath \u2014 the kind that sneaks up on you",
@@ -955,7 +2211,58 @@
       "Something I\u2019ll finish in one sitting and then sit quietly with afterwards",
       "Women navigating the world on their own terms \u2014 no rescue arc, no apologies",
       "Something set in a city that becomes a character in itself \u2014 moody, electric, specific",
-      "A book about obsession. Could be art, a person, a place. Something that consumes"
+      "A book about obsession. Could be art, a person, a place. Something that consumes",
+      // Mood & feeling
+      "I just went through a breakup and I need something that makes me feel less alone but doesn\u2019t wallow",
+      "I want to feel hopeful again. Something gentle, warm, and quietly optimistic",
+      "I\u2019m burned out and need something that feels like a deep exhale",
+      "Something cozy and comforting \u2014 like being wrapped in a blanket with tea on a cold night",
+      "I\u2019m restless and need something with momentum. High stakes, can\u2019t-put-it-down energy",
+      "I want to ugly cry. Give me something devastating but beautiful",
+      "Something that makes me laugh out loud \u2014 genuinely funny, not just quirky",
+      "I\u2019m anxious and need something absorbing enough to quiet my brain",
+      "I feel nostalgic for a time I never lived in. Something that captures that ache",
+      "I need a book that feels like falling in love for the first time",
+      // Atmosphere & setting
+      "A book that smells like old libraries and feels like autumn",
+      "Something sun-drenched and Mediterranean \u2014 I want to taste salt air and olive oil",
+      "Set in a small town where everyone has secrets and the tension builds slowly",
+      "I want to feel like I\u2019m wandering through Tokyo at 2 a.m.",
+      "A book that feels like a long train journey through unfamiliar countryside",
+      "Something that takes place over the course of one day or one night",
+      "A crumbling estate, family secrets, and an atmosphere thick enough to cut",
+      "Set during wartime but focused on the small, human moments between the chaos",
+      "Something that captures the specific magic of being young in a big city for the first time",
+      "A book that feels like a winter cabin \u2014 isolated, still, with something simmering underneath",
+      // Character-driven
+      "A friendship between two women that\u2019s more complex and intense than any romance",
+      "An older protagonist reflecting on their life \u2014 no coming-of-age, I want coming-of-wisdom",
+      "A character who reinvents themselves completely. Identity, transformation, starting over",
+      "Someone brilliant and deeply flawed. The kind of character you can\u2019t stop thinking about",
+      "A family gathering where everything unravels. Secrets, resentments, love underneath it all",
+      "A loner who slowly lets someone in. Quiet intimacy, no grand gestures",
+      "An immigrant story that captures the disorientation and beauty of living between two worlds",
+      "A character running from their past who gets pulled back in",
+      // Genre-leaning
+      "A thriller where I genuinely don\u2019t see the twist coming. Smart, not gimmicky",
+      "Sci-fi that\u2019s really about what it means to be human. Philosophical but not dry",
+      "Fantasy with a rich, original magic system and morally grey characters",
+      "A love story for people who don\u2019t usually read romance \u2014 literary, layered, real",
+      "True crime or investigative non-fiction that reads like a novel",
+      "A memoir that\u2019s brutally honest and beautifully written",
+      "Horror that\u2019s more psychological dread than jump scares \u2014 the kind that lingers",
+      "Historical fiction where I learn something real while being completely absorbed in the story",
+      // Vibes & wildcards
+      "The kind of book English professors argue about at dinner parties",
+      "Something that would pair well with red wine and a thunderstorm",
+      "A book my therapist would recommend if they had impeccable taste",
+      "Something that switches between timelines and makes you piece the story together yourself",
+      "A short, perfect novel \u2014 under 200 pages, not a word wasted",
+      "An epic. I want 500+ pages and a world I can live in for weeks",
+      "Something controversial or polarizing \u2014 the kind of book people either love or hate",
+      "A book that changed how someone sees the world. Perspective-shifting, mind-expanding",
+      "Something that reads like a poem \u2014 spare, lyrical, every sentence deliberate",
+      "A debut novel that felt like it came out of nowhere and floored everyone",
     ];
 
     /* ─── Init ────────────────────────────────────────── */
@@ -969,6 +2276,12 @@
       });
 
       loadLast();
+      initSupabase();
+
+      // Show welcome popup if not dismissed
+      if (!localStorage.getItem('pickmeup_welcome_dismissed')) {
+        document.getElementById('welcomeOverlay').classList.add('show');
+      }
     });
 
     document.addEventListener('keydown', e => {
@@ -981,12 +2294,13 @@
       t.value = SURPRISE[Math.floor(Math.random() * SURPRISE.length)];
       t.focus();
     }
+    window.surpriseMe = surpriseMe;
 
     /* ─── Slider labels ───────────────────────────────── */
     const TONE_LABELS = ['Very light', 'Light', 'Balanced', 'Heavy', 'Very heavy'];
     const PACE_LABELS = ['Very fast-paced', 'Fast-paced', 'Balanced', 'Slow & reflective', 'Very slow & meditative'];
 
-    /* ─── Build Claude prompt ─────────────────────────── */
+    /* ─── Build Claude prompt (fallback for legacy mode) ── */
     function buildPrompt() {
       const mood    = document.getElementById('moodInput').value.trim();
       const rating  = document.getElementById('minRating').value;
@@ -1006,7 +2320,6 @@ Additional preferences:`;
       p += `\n- Tone: ${TONE_LABELS[tone - 1]}`;
       p += `\n- Pace: ${PACE_LABELS[pace - 1]}`;
 
-      // Exclude previously recommended books
       const history = getPastRecommendations();
       if (history.length) {
         p += `\n\nDo NOT recommend any of these books (already recommended previously):\n`;
@@ -1060,7 +2373,6 @@ vibeTags must be evocative and specific (e.g. "melancholic", "darkly comic", "sl
           const img = card.querySelector('.cover-img');
           const placeholder = card.querySelector('.cover-placeholder');
 
-          // Cover — server already validated it's a real image, not a 1x1 placeholder
           if (data.olCover) {
             img.onload = () => {
               img.style.display = 'block';
@@ -1069,28 +2381,41 @@ vibeTags must be evocative and specific (e.g. "melancholic", "darkly comic", "sl
             img.src = data.olCover;
           }
 
-          // Rating
           const olEl = card.querySelector('[data-rating="ol"] .rating-val');
           if (olEl) olEl.textContent = data.olRating ? `${data.olRating} \u2605` : '\u2014';
 
-          // Direct links — only override with ISBN links if we have a confident match
           const isbn = data.isbn13 || data.isbn10;
           if (isbn && data.olCover) {
-            // Only use ISBN-based links when we also got a cover (= confident OL match)
             const grHref  = `https://www.goodreads.com/book/isbn/${isbn}`;
-            const amzHref = `https://www.amazon.com/dp/${data.isbn10 || data.isbn13}`;
+            const amzHref = `https://www.amazon.com/dp/${data.isbn10 || data.isbn13}?tag=nextreadapp-22`;
             card.querySelector('.goodreads-link').href  = grHref;
             card.querySelector('.cover-link').href      = grHref;
             card.querySelector('.card-title-link').href = grHref;
             card.querySelector('.amazon-link').href     = amzHref;
           }
-          // Otherwise keep the original search-based URLs (set in renderBooks)
         });
       } catch {
         container.querySelectorAll('[data-rating="ol"] .rating-val').forEach(el => {
           el.textContent = '\u2014';
         });
       }
+    }
+
+    /* ─── Record interaction ──────────────────────────── */
+    async function recordInteraction(title, author, type, coverUrl) {
+      if (!sbSession?.access_token) return;
+      try {
+        await fetch('/api/interaction', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
+          body: JSON.stringify({
+            title,
+            author,
+            cover_url: coverUrl || null,
+            interaction_type: type,
+          }),
+        });
+      } catch { /* non-fatal */ }
     }
 
     /* ─── API call ────────────────────────────────────── */
@@ -1106,37 +2431,69 @@ vibeTags must be evocative and specific (e.g. "melancholic", "darkly comic", "sl
       setLoading(true);
       document.getElementById('results').innerHTML = '';
 
-      const { prompt, mood: q } = buildPrompt();
+      const q = mood;
 
       try {
-        const res = await fetch('/api/recommend', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ prompt })
-        });
+        let books;
+        let personalized = false;
 
-        if (!res.ok) {
-          const e = await res.json().catch(() => ({}));
-          throw new Error(e.error || `API error ${res.status}`);
+        // Use authenticated search if Supabase is available
+        if (sbSession?.access_token) {
+          const filters = {
+            rating: document.getElementById('minRating').value || undefined,
+            pages: document.getElementById('maxPages').value || undefined,
+            genres: genres.size ? [...genres] : undefined,
+            tone: parseInt(document.getElementById('tone').value),
+            pace: parseInt(document.getElementById('pace').value),
+          };
+
+          const res = await fetch('/api/search', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
+            body: JSON.stringify({ queryText: q, filters }),
+          });
+
+          if (!res.ok) {
+            const e = await res.json().catch(() => ({}));
+            throw new Error(e.error || `API error ${res.status}`);
+          }
+
+          const data = await res.json();
+          books = data.recommendations;
+          personalized = data.personalized;
+        } else {
+          // Fallback: legacy /api/recommend
+          const { prompt } = buildPrompt();
+          const res = await fetch('/api/recommend', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ prompt }),
+          });
+
+          if (!res.ok) {
+            const e = await res.json().catch(() => ({}));
+            throw new Error(e.error || `API error ${res.status}`);
+          }
+
+          const { text } = await res.json();
+          const match = text.match(/\{[\s\S]*\}/);
+          if (!match) throw new Error('Couldn\'t parse the response. Please try again.');
+
+          let parsed;
+          try { parsed = JSON.parse(match[0]); }
+          catch { throw new Error('Couldn\'t parse the response. Please try again.'); }
+
+          books = parsed.books;
         }
 
-        const { text } = await res.json();
-
-        const match = text.match(/\{[\s\S]*\}/);
-        if (!match) throw new Error('Couldn\'t parse the response. Please try again.');
-
-        let parsed;
-        try { parsed = JSON.parse(match[0]); }
-        catch { throw new Error('Couldn\'t parse the response. Please try again.'); }
-
-        if (!parsed.books?.length) throw new Error('No books returned. Please try again.');
+        if (!books?.length) throw new Error('No books returned. Please try again.');
 
         const container = document.getElementById('results');
-        renderBooks(parsed.books, container, q, false);
-        enrichCards(parsed.books, container);
+        renderBooks(books, container, q, false, personalized);
+        enrichCards(books, container);
 
-        localStorage.setItem('nextread_last', JSON.stringify({ q, books: parsed.books }));
-        savePastRecommendations(parsed.books);
+        localStorage.setItem('nextread_last', JSON.stringify({ q, books }));
+        savePastRecommendations(books);
 
         setTimeout(() => container.scrollIntoView({ behavior: 'smooth', block: 'start' }), 150);
 
@@ -1146,13 +2503,15 @@ vibeTags must be evocative and specific (e.g. "melancholic", "darkly comic", "sl
         setLoading(false);
       }
     }
+    window.findBooks = findBooks;
 
     /* ─── Render book cards ───────────────────────────── */
-    function renderBooks(books, container, query, isLast) {
+    function renderBooks(books, container, query, isLast, personalized = false) {
       const head = document.createElement('div');
       head.className = 'results-head';
       head.innerHTML = `
         <span class="results-title">${isLast ? 'From your last search' : `${books.length} books chosen for you`}</span>
+        ${personalized && !isLast ? '<span class="personalized-badge">Personalized for you</span>' : ''}
       `;
       container.appendChild(head);
 
@@ -1162,7 +2521,8 @@ vibeTags must be evocative and specific (e.g. "melancholic", "darkly comic", "sl
 
         const tags = (b.vibeTags || []).map(t => `<span class="vibe-tag">${esc(t)}</span>`).join('');
         const goodreadsHref = `https://www.goodreads.com/search?q=${encodeURIComponent(b.title + ' ' + b.author)}`;
-        const amazonHref    = `https://www.amazon.com/s?k=${encodeURIComponent(b.title + ' ' + b.author)}&i=stripbooks`;
+        const amazonHref    = `https://www.amazon.com/s?k=${encodeURIComponent(b.title + ' ' + b.author)}&i=stripbooks&tag=nextreadapp-22`;
+        const bookId = `${b.title}::${b.author}`.toLowerCase().replace(/[^a-z0-9]+/g, '-');
 
         card.innerHTML = `
           <div class="card-cover-wrap">
@@ -1198,7 +2558,52 @@ vibeTags must be evocative and specific (e.g. "melancholic", "darkly comic", "sl
             <p class="card-match">${esc(b.whyThisMatchesYou)}</p>
           ` : ''}
           ${tags ? `<div class="vibe-tags">${tags}</div>` : ''}
+          <div class="card-actions">
+            <button class="card-action-btn like-btn" data-book-id="${esc(bookId)}" data-title="${esc(b.title)}" data-author="${esc(b.author)}" title="Trains your taste for better picks">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/>
+              </svg>
+              Love this
+            </button>
+            <button class="card-action-btn save-btn" data-book-id="${esc(bookId)}" data-title="${esc(b.title)}" data-author="${esc(b.author)}" title="Add to your reading list">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M19 21l-7-5-7 5V5a2 2 0 012-2h10a2 2 0 012 2z"/>
+              </svg>
+              Save
+            </button>
+          </div>
         `;
+
+        // Wire up action buttons
+        const likeBtn = card.querySelector('.like-btn');
+        const saveBtn = card.querySelector('.save-btn');
+
+        likeBtn.addEventListener('click', () => {
+          if (!sbSession?.user || sbSession.user.is_anonymous) {
+            toast('Sign in to train your taste');
+            showLoginUI();
+            return;
+          }
+          const isActive = likeBtn.classList.toggle('active-like');
+          const type = isActive ? 'like' : 'dislike';
+          recordInteraction(b.title, b.author, type);
+          toast(isActive ? 'Noted! This trains your future picks.' : 'Preference removed');
+        });
+
+        saveBtn.addEventListener('click', () => {
+          if (!sbSession?.user || sbSession.user.is_anonymous) {
+            toast('Sign in to save books');
+            showLoginUI();
+            return;
+          }
+          const isActive = saveBtn.classList.toggle('active-save');
+          if (isActive) {
+            recordInteraction(b.title, b.author, 'save');
+            toast('Added to your reading list');
+          } else {
+            toast('Removed from reading list');
+          }
+        });
 
         container.appendChild(card);
         requestAnimationFrame(() => {
@@ -1231,13 +2636,14 @@ vibeTags must be evocative and specific (e.g. "melancholic", "darkly comic", "sl
       localStorage.removeItem('nextread_last');
       document.getElementById('lastSearch').classList.remove('show');
     }
+    window.clearLast = clearLast;
 
     /* ─── UI helpers ──────────────────────────────────── */
     function setLoading(on) {
       document.getElementById('loading').classList.toggle('show', on);
       const btn = document.getElementById('findBtn');
       btn.disabled = on;
-      btn.textContent = on ? 'Finding\u2026' : 'Find my next read';
+      btn.textContent = on ? 'Finding\u2026' : 'Pick me up';
     }
 
     function showErr(msg) {
