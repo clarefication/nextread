@@ -1,0 +1,12 @@
+{
+  "functions": {
+    "api/*.js": {
+      "maxDuration": 30
+    }
+  },
+  "rewrites": [
+    { "source": "/api/recommend", "destination": "/api/recommend" },
+    { "source": "/api/books-meta", "destination": "/api/books-meta" },
+    { "source": "/api/book-meta", "destination": "/api/book-meta" }
+  ]
+}

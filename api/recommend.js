@@ -1,17 +1,8 @@
-require('dotenv').config();
-const express = require('express');
-const cors = require('cors');
-const path = require('path');
-const { verifyBookExists, lookupBook } = require('./api/_helpers');
+const { verifyBookExists } = require('./_helpers');
 
-const app = express();
-const PORT = process.env.PORT || 3000;
+module.exports = async function handler(req, res) {
+  if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
-app.use(cors());
-app.use(express.json());
-app.use(express.static(path.join(__dirname)));
-
-app.post('/api/recommend', async (req, res) => {
   const { prompt } = req.body;
   if (!prompt) return res.status(400).json({ error: 'prompt is required' });
 
@@ -63,25 +54,4 @@ app.post('/api/recommend', async (req, res) => {
   } catch (err) {
     res.status(500).json({ error: err.message || 'Something went wrong' });
   }
-});
-
-app.post('/api/book-meta', async (req, res) => {
-  const { title, author } = req.body;
-  if (!title || !author) return res.status(400).json({ error: 'title and author required' });
-  res.json(await lookupBook(title, author));
-});
-
-app.post('/api/books-meta', async (req, res) => {
-  const { books } = req.body;
-  if (!Array.isArray(books)) return res.status(400).json({ error: 'books array required' });
-  const results = await Promise.all(
-    books.map(b => lookupBook(b.title, b.author).catch(() => ({
-      olCover: null, olRating: null, isbn13: null, isbn10: null
-    })))
-  );
-  res.json({ results });
-});
-
-app.listen(PORT, () => {
-  console.log(`Next Read running at http://localhost:${PORT}`);
-});
+};
