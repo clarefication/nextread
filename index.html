@@ -1,0 +1,1269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Next Read</title>
+
+  <!--
+  ╔══════════════════════════════════════════════════════╗
+  ║                    NEXT READ                         ║
+  ║         Taste-Based Book Recommendations             ║
+  ╠══════════════════════════════════════════════════════╣
+  ║  HOW TO RUN:                                         ║
+  ║                                                      ║
+  ║  1. Add your Anthropic API key to .env:              ║
+  ║     ANTHROPIC_API_KEY=sk-ant-...                     ║
+  ║                                                      ║
+  ║  2. npm install && node server.js                    ║
+  ║                                                      ║
+  ║  3. Open http://localhost:3000                       ║
+  ║                                                      ║
+  ║  SHORTCUTS:                                          ║
+  ║  → Cmd/Ctrl + Enter to submit                        ║
+  ║  → "Surprise me" fills a random evocative prompt     ║
+  ║                                                      ║
+  ║  NOTES:                                              ║
+  ║  → API key lives in .env — never in the browser      ║
+  ║  → Last search is saved in localStorage              ║
+  ╚══════════════════════════════════════════════════════╝
+  -->
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Outfit:wght@200;300;400;500;600&display=swap" rel="stylesheet">
+
+  <style>
+    /* ─── Reset & Base ─────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --c-bg:         #0C0B09;
+      --c-bg-card:    #1A1816;
+      --c-bg-surface: #141210;
+      --c-bg-input:   #0F0E0C;
+      --c-bg-dim:     #1E1C19;
+
+      --c-ink:        #E8E2D8;
+      --c-ink-mid:    #A69E90;
+      --c-ink-soft:   #6D6560;
+      --c-ink-faint:  #3D3832;
+
+      --c-amber:       #D4A054;
+      --c-amber-mid:   #A07A3A;
+      --c-amber-faint: rgba(212, 160, 84, 0.08);
+      --c-amber-glow:  rgba(212, 160, 84, 0.15);
+
+      --c-sage:       #7A9A7C;
+      --c-sage-faint: rgba(122, 154, 124, 0.10);
+
+      --c-err:        #C46B5E;
+      --c-err-bg:     rgba(196, 107, 94, 0.10);
+
+      --c-border:     #2A2622;
+      --c-border-lt:  #332F2A;
+      --c-shadow:     rgba(0, 0, 0, 0.35);
+      --c-shadow-md:  rgba(0, 0, 0, 0.55);
+
+      --f-display: 'Instrument Serif', 'Georgia', serif;
+      --f-body:    'Outfit', system-ui, sans-serif;
+
+      --r:    16px;
+      --r-sm: 10px;
+      --ease: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    html { font-size: 16px; -webkit-font-smoothing: antialiased; scroll-behavior: smooth; }
+
+    body {
+      background-color: var(--c-bg);
+      color: var(--c-ink);
+      font-family: var(--f-body);
+      font-weight: 300;
+      line-height: 1.7;
+      min-height: 100vh;
+      background-image:
+        radial-gradient(ellipse 80% 60% at 20% 50%, rgba(212,160,84,.03) 0%, transparent 60%),
+        radial-gradient(ellipse 60% 50% at 80% 20%, rgba(122,154,124,.02) 0%, transparent 55%),
+        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23noise)' opacity='.03'/%3E%3C/svg%3E");
+    }
+
+    ::selection {
+      background: var(--c-amber);
+      color: var(--c-bg);
+    }
+
+    /* ─── Layout ────────────────────────────────────── */
+    .wrap { max-width: 800px; margin: 0 auto; padding: 0 28px; }
+
+    /* ─── Top bar ───────────────────────────────────── */
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 28px 28px 0;
+      max-width: 800px;
+      margin: 0 auto;
+    }
+
+    .topbar-brand {
+      font-family: var(--f-display);
+      font-size: 1.1rem;
+      font-weight: 400;
+      letter-spacing: 0.03em;
+      color: var(--c-ink-soft);
+    }
+
+    /* ─── Hero header ───────────────────────────────── */
+    header {
+      text-align: center;
+      padding: 56px 0 48px;
+    }
+
+    .hero-eyebrow {
+      font-family: var(--f-body);
+      font-size: 0.72rem;
+      font-weight: 400;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--c-amber);
+      margin-bottom: 18px;
+      display: block;
+    }
+
+    h1 {
+      font-family: var(--f-display);
+      font-size: clamp(3.5rem, 11vw, 6.5rem);
+      font-weight: 400;
+      letter-spacing: -0.025em;
+      line-height: 0.92;
+      color: var(--c-ink);
+    }
+
+    h1 .italic {
+      font-style: italic;
+      color: var(--c-amber);
+    }
+
+    .hero-tagline {
+      margin-top: 20px;
+      font-family: var(--f-display);
+      font-size: 1.25rem;
+      font-style: italic;
+      font-weight: 400;
+      color: var(--c-ink-mid);
+      letter-spacing: 0.01em;
+    }
+
+    .hero-rule {
+      width: 48px;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--c-amber-mid), transparent);
+      margin: 28px auto 0;
+    }
+
+    /* ─── Error box ─────────────────────────────────── */
+    .error-box {
+      display: none;
+      background: var(--c-err-bg);
+      border: 1px solid rgba(196, 107, 94, 0.2);
+      border-radius: var(--r-sm);
+      padding: 16px 20px;
+      margin-bottom: 20px;
+      font-size: 0.9rem;
+      color: var(--c-err);
+      line-height: 1.5;
+    }
+    .error-box.show { display: block; }
+
+    /* ─── Search card ───────────────────────────────── */
+    .search-card {
+      background: var(--c-bg-card);
+      border: 1px solid var(--c-border);
+      border-radius: var(--r);
+      padding: 36px 36px 32px;
+      margin-bottom: 32px;
+      box-shadow: 0 4px 40px var(--c-shadow);
+    }
+
+    @media (max-width: 560px) { .search-card { padding: 24px 20px 22px; } }
+
+    .input-heading {
+      font-family: var(--f-display);
+      font-size: 1.4rem;
+      font-weight: 400;
+      color: var(--c-ink);
+      display: block;
+      margin-bottom: 16px;
+    }
+
+    textarea {
+      width: 100%;
+      font-family: var(--f-body);
+      font-size: 1rem;
+      font-weight: 300;
+      line-height: 1.72;
+      color: var(--c-ink);
+      background: var(--c-bg-input);
+      border: 1px solid var(--c-border);
+      border-radius: var(--r-sm);
+      padding: 18px 20px;
+      resize: vertical;
+      min-height: 120px;
+      outline: none;
+      transition: border-color var(--ease), box-shadow var(--ease);
+    }
+    textarea::placeholder { color: var(--c-ink-soft); font-style: italic; font-weight: 200; }
+    textarea:focus {
+      border-color: var(--c-amber-mid);
+      box-shadow: 0 0 0 3px var(--c-amber-faint);
+    }
+
+    /* ─── Section divider ───────────────────────────── */
+    .divider {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin: 28px 0 22px;
+    }
+    .divider::before, .divider::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--c-border);
+    }
+    .divider span {
+      font-size: 0.65rem;
+      font-weight: 500;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--c-ink-soft);
+      white-space: nowrap;
+    }
+
+    /* ─── Filters grid ──────────────────────────────── */
+    .filters-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-bottom: 20px;
+    }
+    @media (max-width: 480px) { .filters-grid { grid-template-columns: 1fr; } }
+
+    .filter-group label, .field-label {
+      display: block;
+      font-size: 0.68rem;
+      font-weight: 500;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--c-ink-soft);
+      margin-bottom: 8px;
+    }
+
+    select, input[type="number"] {
+      width: 100%;
+      font-family: var(--f-body);
+      font-size: 0.95rem;
+      font-weight: 300;
+      color: var(--c-ink);
+      background: var(--c-bg-input);
+      border: 1px solid var(--c-border);
+      border-radius: var(--r-sm);
+      padding: 10px 14px;
+      outline: none;
+      transition: border-color var(--ease);
+      -webkit-appearance: none;
+      appearance: none;
+    }
+    select {
+      background-image: url("data:image/svg+xml,%3Csvg width='11' height='7' viewBox='0 0 11 7' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1l4.5 4.5L10 1' stroke='%236D6560' stroke-width='1.4' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 14px center;
+      padding-right: 34px;
+      cursor: pointer;
+    }
+    select option { background: var(--c-bg-card); color: var(--c-ink); }
+    select:focus, input[type="number"]:focus { border-color: var(--c-amber-mid); }
+    input[type="number"]::-webkit-inner-spin-button { opacity: 0.3; }
+
+    /* ─── Genre chips ───────────────────────────────── */
+    .genre-row { grid-column: 1 / -1; }
+
+    .chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      padding: 7px 16px;
+      border: 1px solid var(--c-border);
+      border-radius: 100px;
+      font-family: var(--f-body);
+      font-size: 0.82rem;
+      font-weight: 400;
+      color: var(--c-ink-mid);
+      background: transparent;
+      cursor: pointer;
+      transition: all var(--ease);
+      user-select: none;
+      -webkit-user-select: none;
+    }
+    .chip:hover {
+      border-color: var(--c-amber-mid);
+      color: var(--c-amber);
+      background: var(--c-amber-faint);
+    }
+    .chip.on {
+      border-color: var(--c-amber);
+      color: var(--c-amber);
+      background: var(--c-amber-faint);
+      font-weight: 500;
+    }
+
+    /* ─── Tone sliders ──────────────────────────────── */
+    .sliders { margin-top: 6px; }
+
+    .slider-row { margin-bottom: 16px; }
+
+    .slider-ends {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+    .slider-end {
+      font-size: 0.78rem;
+      color: var(--c-ink-mid);
+      font-weight: 300;
+    }
+    .slider-mid {
+      font-size: 0.62rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--c-ink-soft);
+      font-weight: 500;
+    }
+
+    input[type="range"] {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 100%;
+      height: 2px;
+      background: var(--c-border-lt);
+      border-radius: 100px;
+      outline: none;
+      cursor: pointer;
+    }
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: var(--c-bg-card);
+      border: 2px solid var(--c-amber);
+      cursor: pointer;
+      box-shadow: 0 2px 8px rgba(0,0,0,.4);
+      transition: transform var(--ease), box-shadow var(--ease);
+    }
+    input[type="range"]::-webkit-slider-thumb:hover {
+      transform: scale(1.25);
+      box-shadow: 0 0 14px var(--c-amber-glow);
+    }
+    input[type="range"]::-moz-range-thumb {
+      width: 18px; height: 18px;
+      border-radius: 50%;
+      background: var(--c-bg-card);
+      border: 2px solid var(--c-amber);
+      cursor: pointer;
+    }
+
+    /* ─── Action buttons ────────────────────────────── */
+    .actions {
+      display: flex;
+      gap: 12px;
+      margin-top: 30px;
+    }
+    @media (max-width: 440px) { .actions { flex-direction: column; } }
+
+    .btn-primary {
+      flex: 1;
+      font-family: var(--f-body);
+      font-size: 1rem;
+      font-weight: 500;
+      letter-spacing: 0.03em;
+      color: var(--c-bg);
+      background: var(--c-amber);
+      border: none;
+      border-radius: var(--r-sm);
+      padding: 16px 24px;
+      cursor: pointer;
+      transition: all var(--ease);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+    .btn-primary:hover:not(:disabled) {
+      background: #E0AD5E;
+      transform: translateY(-1px);
+      box-shadow: 0 8px 28px rgba(212, 160, 84, 0.3);
+    }
+    .btn-primary:active:not(:disabled) { transform: translateY(0); }
+    .btn-primary:disabled { opacity: .5; cursor: not-allowed; }
+
+    .btn-ghost {
+      font-family: var(--f-body);
+      font-size: 0.85rem;
+      font-weight: 400;
+      letter-spacing: 0.04em;
+      color: var(--c-ink-mid);
+      background: none;
+      border: 1px solid var(--c-border);
+      border-radius: var(--r-sm);
+      padding: 16px 20px;
+      cursor: pointer;
+      transition: all var(--ease);
+      white-space: nowrap;
+    }
+    .btn-ghost:hover {
+      border-color: var(--c-ink-soft);
+      color: var(--c-ink);
+      background: rgba(255,255,255,.03);
+    }
+
+    /* ─── Loading ────────────────────────────────────── */
+    .loading {
+      display: none;
+      text-align: center;
+      padding: 60px 24px;
+    }
+    .loading.show { display: block; }
+
+    .loading-dots {
+      display: inline-flex;
+      gap: 8px;
+      margin-bottom: 20px;
+    }
+    .dot {
+      width: 8px;
+      height: 8px;
+      background: var(--c-amber);
+      border-radius: 50%;
+      animation: dotPulse 1.5s ease-in-out infinite;
+    }
+    .dot:nth-child(2) { animation-delay: 0.22s; }
+    .dot:nth-child(3) { animation-delay: 0.44s; }
+
+    @keyframes dotPulse {
+      0%, 80%, 100% { transform: scale(0.7); opacity: 0.3; }
+      40%            { transform: scale(1);   opacity: 1; }
+    }
+
+    .loading-text {
+      font-family: var(--f-display);
+      font-size: 1.35rem;
+      font-style: italic;
+      font-weight: 400;
+      color: var(--c-ink-mid);
+    }
+
+    /* ─── Results ────────────────────────────────────── */
+    #results { margin-bottom: 0; }
+
+    .results-head {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 28px;
+    }
+
+    .results-title {
+      font-family: var(--f-display);
+      font-size: 1.6rem;
+      font-weight: 400;
+      color: var(--c-ink);
+    }
+
+    /* ─── Book card ──────────────────────────────────── */
+    .book-card {
+      background: var(--c-bg-card);
+      border: 1px solid var(--c-border);
+      border-radius: var(--r);
+      padding: 32px 32px 28px;
+      margin-bottom: 18px;
+      box-shadow: 0 4px 30px var(--c-shadow);
+      position: relative;
+      overflow: hidden;
+      opacity: 0;
+      transform: translateY(18px);
+      transition: opacity .45s ease, transform .45s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+    }
+    .book-card.in { opacity: 1; transform: translateY(0); }
+    .book-card:hover {
+      box-shadow: 0 8px 50px var(--c-shadow-md), 0 0 60px rgba(212, 160, 84, 0.04);
+      border-color: var(--c-border-lt);
+    }
+
+    @media (max-width: 560px) { .book-card { padding: 24px 20px 22px; } }
+
+    /* ─── Card cover (centred, top) ─────────────────── */
+    .card-cover-wrap {
+      text-align: center;
+      margin-bottom: 26px;
+    }
+
+    .card-cover-wrap a {
+      display: inline-block;
+      text-decoration: none;
+      transition: transform 0.3s ease;
+    }
+    .card-cover-wrap a:hover { transform: scale(1.03); }
+
+    .cover-placeholder {
+      width: 150px;
+      height: 225px;
+      background: var(--c-bg-dim);
+      border: 1px solid var(--c-border);
+      border-radius: 8px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .cover-img {
+      width: 150px;
+      height: auto;
+      display: none;
+      border-radius: 8px;
+      box-shadow: 0 10px 40px var(--c-shadow-md);
+    }
+
+    /* ─── Card header (centred) ──────────────────────── */
+    .card-header { text-align: center; }
+
+    /* ─── Card text ──────────────────────────────────── */
+    .card-eyebrow {
+      font-family: var(--f-body);
+      font-size: 0.68rem;
+      font-weight: 500;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--c-amber-mid);
+      display: block;
+      margin-bottom: 8px;
+    }
+
+    .card-title-link {
+      text-decoration: none;
+      color: inherit;
+      display: block;
+    }
+    .card-title-link:hover .card-title { color: var(--c-amber); }
+
+    .card-title {
+      font-family: var(--f-display);
+      font-size: 1.85rem;
+      font-weight: 400;
+      line-height: 1.15;
+      color: var(--c-ink);
+      margin-bottom: 6px;
+      transition: color var(--ease);
+    }
+
+    .card-author {
+      font-family: var(--f-display);
+      font-size: 1.1rem;
+      font-style: italic;
+      font-weight: 400;
+      color: var(--c-ink-mid);
+      margin-bottom: 14px;
+    }
+
+    /* ─── Ratings row ────────────────────────────────── */
+    .ratings-row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      margin-top: 14px;
+      margin-bottom: 0;
+    }
+
+    .rating-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 0.72rem;
+      font-weight: 500;
+      letter-spacing: 0.03em;
+      border-radius: 100px;
+      padding: 4px 12px;
+    }
+
+    .rating-badge .rating-source {
+      font-weight: 400;
+      opacity: 0.7;
+    }
+
+    .rating-ol {
+      color: var(--c-sage);
+      background: var(--c-sage-faint);
+    }
+
+    .rating-link {
+      display: inline-flex;
+      align-items: center;
+      font-family: var(--f-body);
+      font-size: 0.72rem;
+      font-weight: 400;
+      letter-spacing: 0.03em;
+      color: var(--c-ink-soft);
+      text-decoration: none;
+      padding: 4px 12px;
+      border: 1px solid var(--c-border);
+      border-radius: 100px;
+      transition: all var(--ease);
+    }
+    .rating-link:hover {
+      color: var(--c-amber);
+      border-color: var(--c-amber-mid);
+      background: var(--c-amber-faint);
+    }
+
+    /* ─── Card body text ─────────────────────────────── */
+    .card-rule {
+      height: 1px;
+      background: var(--c-border);
+      margin: 18px 0;
+    }
+
+    .card-summary {
+      font-size: 0.95rem;
+      font-weight: 300;
+      line-height: 1.78;
+      color: var(--c-ink-mid);
+      margin-bottom: 18px;
+    }
+
+    .card-match-label {
+      display: block;
+      font-size: 0.62rem;
+      font-weight: 500;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--c-amber);
+      margin-bottom: 6px;
+    }
+
+    .card-match {
+      font-family: var(--f-display);
+      font-size: 1.08rem;
+      font-style: italic;
+      font-weight: 400;
+      line-height: 1.65;
+      color: var(--c-ink);
+      margin-bottom: 20px;
+    }
+
+    .vibe-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 7px;
+    }
+
+    .vibe-tag {
+      font-size: 0.72rem;
+      font-weight: 400;
+      letter-spacing: 0.04em;
+      color: var(--c-ink-soft);
+      background: var(--c-bg-dim);
+      border: 1px solid var(--c-border);
+      border-radius: 100px;
+      padding: 4px 14px;
+      transition: all var(--ease);
+    }
+    .vibe-tag:hover {
+      border-color: var(--c-ink-faint);
+      color: var(--c-ink-mid);
+    }
+
+    /* ─── Last search ────────────────────────────────── */
+    .last-search {
+      display: none;
+      border-top: 1px solid var(--c-border);
+      padding-top: 48px;
+      margin-top: 48px;
+      margin-bottom: 36px;
+    }
+    .last-search.show { display: block; }
+
+    .last-head {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 18px;
+      flex-wrap: wrap;
+    }
+
+    .last-title {
+      font-family: var(--f-display);
+      font-size: 1.25rem;
+      font-weight: 400;
+      color: var(--c-ink-mid);
+    }
+
+    .btn-text {
+      font-family: var(--f-body);
+      font-size: 0.72rem;
+      font-weight: 400;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--c-ink-soft);
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 0;
+      transition: color var(--ease);
+    }
+    .btn-text:hover { color: var(--c-amber); }
+
+    .last-query {
+      font-family: var(--f-display);
+      font-size: 1.05rem;
+      font-style: italic;
+      color: var(--c-ink-mid);
+      background: var(--c-bg-dim);
+      border-left: 2px solid var(--c-amber-mid);
+      border-radius: 0 var(--r-sm) var(--r-sm) 0;
+      padding: 14px 18px;
+      margin-bottom: 24px;
+    }
+
+    /* ─── Footer ─────────────────────────────────────── */
+    footer {
+      text-align: center;
+      padding: 36px 0 52px;
+      border-top: 1px solid var(--c-border);
+      font-size: 0.75rem;
+      color: var(--c-ink-soft);
+      letter-spacing: 0.05em;
+    }
+
+    /* ─── Toast ──────────────────────────────────────── */
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: var(--c-ink);
+      color: var(--c-bg);
+      font-family: var(--f-body);
+      font-size: 0.82rem;
+      font-weight: 400;
+      padding: 12px 20px;
+      border-radius: var(--r-sm);
+      opacity: 0;
+      transform: translateY(8px);
+      transition: all .25s ease;
+      pointer-events: none;
+      z-index: 999;
+    }
+    .toast.show { opacity: 1; transform: translateY(0); }
+
+    /* ─── Spacer ─────────────────────────────────────── */
+    .spacer { height: 36px; }
+
+    /* ─── Fade-in on load ───────────────────────────── */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .search-card  { animation: fadeUp 0.6s ease both 0.1s; }
+    header        { animation: fadeUp 0.6s ease both 0s; }
+  </style>
+</head>
+<body>
+
+  <!-- Top bar -->
+  <div class="topbar">
+    <span class="topbar-brand">Next Read</span>
+  </div>
+
+  <div class="wrap">
+
+    <!-- Hero -->
+    <header>
+      <span class="hero-eyebrow">a different kind of recommendation</span>
+      <h1>Next <span class="italic">Read</span></h1>
+      <p class="hero-tagline">Books chosen for you, not for everyone.</p>
+      <div class="hero-rule"></div>
+    </header>
+
+    <!-- Error -->
+    <div class="error-box" id="errorBox"></div>
+
+    <!-- Search card -->
+    <div class="search-card">
+      <label class="input-heading" for="moodInput">What are you in the mood to read?</label>
+      <textarea
+        id="moodInput"
+        rows="4"
+        placeholder="Describe what you feel like reading — for example, something introspective, slightly sad, strong female lead, not too heavy"
+      ></textarea>
+
+      <div class="divider"><span>Refine your search</span></div>
+
+      <div class="filters-grid">
+
+        <div class="filter-group">
+          <label for="minRating">Min Goodreads Rating</label>
+          <select id="minRating">
+            <option value="">Any rating</option>
+            <option value="3.5">3.5+</option>
+            <option value="3.8">3.8+</option>
+            <option value="4.0" selected>4.0+</option>
+            <option value="4.2">4.2+</option>
+          </select>
+        </div>
+
+        <div class="filter-group">
+          <label for="maxPages">Max Page Count</label>
+          <input type="number" id="maxPages" placeholder="e.g. 350" min="50" max="2000" />
+        </div>
+
+        <div class="filter-group genre-row">
+          <label>Genre <span style="font-style:italic; font-weight:200; text-transform:none; letter-spacing:0">(pick any)</span></label>
+          <div class="chips" id="genreChips">
+            <span class="chip" data-g="Fiction">Fiction</span>
+            <span class="chip" data-g="Non-fiction">Non-fiction</span>
+            <span class="chip" data-g="Literary Fiction">Literary Fiction</span>
+            <span class="chip" data-g="Romance">Romance</span>
+            <span class="chip" data-g="Thriller">Thriller</span>
+            <span class="chip" data-g="Mystery">Mystery</span>
+            <span class="chip" data-g="Fantasy">Fantasy</span>
+            <span class="chip" data-g="Sci-fi">Sci-fi</span>
+            <span class="chip" data-g="Historical">Historical</span>
+            <span class="chip" data-g="Essay Collection">Essay Collection</span>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="sliders">
+        <div class="divider" style="margin-top:4px"><span>Tone & Pace</span></div>
+
+        <div class="slider-row">
+          <div class="slider-ends">
+            <span class="slider-end">Light</span>
+            <span class="slider-mid">Tone</span>
+            <span class="slider-end">Heavy</span>
+          </div>
+          <input type="range" id="tone" min="1" max="5" value="3">
+        </div>
+
+        <div class="slider-row" style="margin-bottom:0">
+          <div class="slider-ends">
+            <span class="slider-end">Fast-paced</span>
+            <span class="slider-mid">Pace</span>
+            <span class="slider-end">Slow &amp; reflective</span>
+          </div>
+          <input type="range" id="pace" min="1" max="5" value="3">
+        </div>
+      </div>
+
+      <div class="actions">
+        <button class="btn-primary" id="findBtn" onclick="findBooks()">
+          Find my next read
+        </button>
+        <button class="btn-ghost" onclick="surpriseMe()">
+          Surprise me
+        </button>
+      </div>
+    </div>
+
+    <!-- Loading -->
+    <div class="loading" id="loading">
+      <div class="loading-dots">
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <div class="dot"></div>
+      </div>
+      <p class="loading-text">Finding something that fits your mood...</p>
+    </div>
+
+    <!-- Current results -->
+    <div id="results"></div>
+
+    <div class="spacer"></div>
+
+    <!-- Last search -->
+    <div class="last-search" id="lastSearch">
+      <div class="last-head">
+        <span class="last-title">Your last search</span>
+        <button class="btn-text" onclick="clearLast()">Clear</button>
+      </div>
+      <div class="last-query" id="lastQuery"></div>
+      <div id="lastResults"></div>
+    </div>
+
+    <footer>Powered by Claude &middot; Books chosen with care, not by committee</footer>
+
+  </div>
+
+  <!-- Toast -->
+  <div class="toast" id="toast"></div>
+
+  <script>
+    /* ─── State ───────────────────────────────────────── */
+    const genres = new Set();
+    const HISTORY_KEY = 'nextread_history';
+    const HISTORY_MAX = 60; // remember last 60 books to avoid repeats
+
+    function getPastRecommendations() {
+      try { return JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]'); }
+      catch { return []; }
+    }
+
+    function savePastRecommendations(books) {
+      const history = getPastRecommendations();
+      books.forEach(b => {
+        // Avoid duplicate entries in history
+        if (!history.some(h => h.title.toLowerCase() === b.title.toLowerCase())) {
+          history.push({ title: b.title, author: b.author });
+        }
+      });
+      // Keep only the most recent entries
+      while (history.length > HISTORY_MAX) history.shift();
+      localStorage.setItem(HISTORY_KEY, JSON.stringify(history));
+    }
+
+    const SURPRISE = [
+      "Something that feels like a rainy Sunday afternoon \u2014 quiet, a little bittersweet, no rush to get anywhere",
+      "A book I can disappear into completely. Takes me somewhere else and makes me forget my own life for a few hours",
+      "Something sharp and witty but with real emotional weight underneath \u2014 the kind that sneaks up on you",
+      "A narrator I\u2019m not sure I should trust. Morally complicated, unreliable, fascinating",
+      "Something set in a place that feels completely foreign but becomes intimate by the last page",
+      "Beautiful prose. I want to read sentences twice just to feel them again",
+      "Quiet and domestic, but with a creeping sense of unease underneath it all",
+      "A story about grief or loss that doesn\u2019t feel heavy-handed \u2014 honest and restrained, not overwrought",
+      "Something I\u2019ll finish in one sitting and then sit quietly with afterwards",
+      "Women navigating the world on their own terms \u2014 no rescue arc, no apologies",
+      "Something set in a city that becomes a character in itself \u2014 moody, electric, specific",
+      "A book about obsession. Could be art, a person, a place. Something that consumes"
+    ];
+
+    /* ─── Init ────────────────────────────────────────── */
+    document.addEventListener('DOMContentLoaded', () => {
+      document.querySelectorAll('.chip').forEach(el => {
+        el.addEventListener('click', () => {
+          const g = el.dataset.g;
+          if (genres.has(g)) { genres.delete(g); el.classList.remove('on'); }
+          else                { genres.add(g);    el.classList.add('on'); }
+        });
+      });
+
+      loadLast();
+    });
+
+    document.addEventListener('keydown', e => {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') findBooks();
+    });
+
+    /* ─── Surprise me ─────────────────────────────────── */
+    function surpriseMe() {
+      const t = document.getElementById('moodInput');
+      t.value = SURPRISE[Math.floor(Math.random() * SURPRISE.length)];
+      t.focus();
+    }
+
+    /* ─── Slider labels ───────────────────────────────── */
+    const TONE_LABELS = ['Very light', 'Light', 'Balanced', 'Heavy', 'Very heavy'];
+    const PACE_LABELS = ['Very fast-paced', 'Fast-paced', 'Balanced', 'Slow & reflective', 'Very slow & meditative'];
+
+    /* ─── Build Claude prompt ─────────────────────────── */
+    function buildPrompt() {
+      const mood    = document.getElementById('moodInput').value.trim();
+      const rating  = document.getElementById('minRating').value;
+      const pages   = document.getElementById('maxPages').value;
+      const tone    = parseInt(document.getElementById('tone').value);
+      const pace    = parseInt(document.getElementById('pace').value);
+      const genreList = [...genres];
+
+      let p = `You are a discerning literary curator. Your job is to recommend real, published books that genuinely exist. Accuracy is paramount.
+
+The reader is looking for: "${mood}"
+
+Additional preferences:`;
+      if (rating)           p += `\n- Minimum Goodreads rating: ${rating}+`;
+      if (pages)            p += `\n- Maximum page count: ${pages} pages`;
+      if (genreList.length) p += `\n- Preferred genre(s): ${genreList.join(', ')}`;
+      p += `\n- Tone: ${TONE_LABELS[tone - 1]}`;
+      p += `\n- Pace: ${PACE_LABELS[pace - 1]}`;
+
+      // Exclude previously recommended books
+      const history = getPastRecommendations();
+      if (history.length) {
+        p += `\n\nDo NOT recommend any of these books (already recommended previously):\n`;
+        history.forEach(h => { p += `- "${h.title}" by ${h.author}\n`; });
+      }
+
+      p += `
+
+RULES (follow every single one exactly):
+1. Return exactly 3 books. No more, no fewer.
+2. ONLY recommend books you are 100% certain are real, published works. Use the exact title as it appears on the cover. Use the author's real, full name. If you are not completely sure a book exists, do NOT include it.
+3. The "summary" field must be a factually accurate 1\u20132 sentence description of what the book is actually about. Do NOT invent plot details, characters, or settings. Only state facts you are certain of. If unsure of specifics, keep the summary high-level rather than risk inaccuracy.
+4. Do NOT default to the most famous or obvious picks. Think past the first tier of popular recommendations. But never sacrifice accuracy for obscurity \u2014 a well-known book that perfectly fits is better than an obscure one you\u2019re unsure about.
+5. Every recommendation must feel intentional and personal, not algorithmic.
+6. Each book must be a distinct, different recommendation. Never repeat authors across the 3 picks.
+
+Respond with ONLY a valid JSON object \u2014 no markdown fences, no explanation text, just raw JSON:
+
+{
+  "books": [
+    {
+      "title": "Exact Book Title",
+      "author": "Full Author Name",
+      "summary": "Factually accurate 1\u20132 sentence description.",
+      "whyThisMatchesYou": "1\u20132 sentences explaining precisely why this book fits what this reader described.",
+      "vibeTags": ["tag1", "tag2", "tag3"]
+    }
+  ]
+}
+
+vibeTags must be evocative and specific (e.g. "melancholic", "darkly comic", "slow-burn", "lush prose", "unreliable narrator", "claustrophobic", "tender", "razor-sharp", "quiet dread"). 3\u20135 tags per book.`;
+
+      return { mood, prompt: p };
+    }
+
+    /* ─── Enrich cards with real data (batch) ────────── */
+    async function enrichCards(books, container) {
+      try {
+        const res = await fetch('/api/books-meta', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ books: books.map(b => ({ title: b.title, author: b.author })) }),
+        });
+        if (!res.ok) return;
+        const { results } = await res.json();
+
+        results.forEach((data, i) => {
+          const card = container.querySelectorAll('.book-card')[i];
+          if (!card) return;
+
+          const img = card.querySelector('.cover-img');
+          const placeholder = card.querySelector('.cover-placeholder');
+
+          // Cover — server already validated it's a real image, not a 1x1 placeholder
+          if (data.olCover) {
+            img.onload = () => {
+              img.style.display = 'block';
+              if (placeholder) placeholder.style.display = 'none';
+            };
+            img.src = data.olCover;
+          }
+
+          // Rating
+          const olEl = card.querySelector('[data-rating="ol"] .rating-val');
+          if (olEl) olEl.textContent = data.olRating ? `${data.olRating} \u2605` : '\u2014';
+
+          // Direct links — only override with ISBN links if we have a confident match
+          const isbn = data.isbn13 || data.isbn10;
+          if (isbn && data.olCover) {
+            // Only use ISBN-based links when we also got a cover (= confident OL match)
+            const grHref  = `https://www.goodreads.com/book/isbn/${isbn}`;
+            const amzHref = `https://www.amazon.com/dp/${data.isbn10 || data.isbn13}`;
+            card.querySelector('.goodreads-link').href  = grHref;
+            card.querySelector('.cover-link').href      = grHref;
+            card.querySelector('.card-title-link').href = grHref;
+            card.querySelector('.amazon-link').href     = amzHref;
+          }
+          // Otherwise keep the original search-based URLs (set in renderBooks)
+        });
+      } catch {
+        container.querySelectorAll('[data-rating="ol"] .rating-val').forEach(el => {
+          el.textContent = '\u2014';
+        });
+      }
+    }
+
+    /* ─── API call ────────────────────────────────────── */
+    async function findBooks() {
+      const mood = document.getElementById('moodInput').value.trim();
+      if (!mood) {
+        showErr('Tell me what you\'re in the mood to read \u2014 even a single word or feeling is fine.');
+        document.getElementById('moodInput').focus();
+        return;
+      }
+
+      clearErr();
+      setLoading(true);
+      document.getElementById('results').innerHTML = '';
+
+      const { prompt, mood: q } = buildPrompt();
+
+      try {
+        const res = await fetch('/api/recommend', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ prompt })
+        });
+
+        if (!res.ok) {
+          const e = await res.json().catch(() => ({}));
+          throw new Error(e.error || `API error ${res.status}`);
+        }
+
+        const { text } = await res.json();
+
+        const match = text.match(/\{[\s\S]*\}/);
+        if (!match) throw new Error('Couldn\'t parse the response. Please try again.');
+
+        let parsed;
+        try { parsed = JSON.parse(match[0]); }
+        catch { throw new Error('Couldn\'t parse the response. Please try again.'); }
+
+        if (!parsed.books?.length) throw new Error('No books returned. Please try again.');
+
+        const container = document.getElementById('results');
+        renderBooks(parsed.books, container, q, false);
+        enrichCards(parsed.books, container);
+
+        localStorage.setItem('nextread_last', JSON.stringify({ q, books: parsed.books }));
+        savePastRecommendations(parsed.books);
+
+        setTimeout(() => container.scrollIntoView({ behavior: 'smooth', block: 'start' }), 150);
+
+      } catch (err) {
+        showErr(err.message || 'Something went wrong. Please try again.');
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    /* ─── Render book cards ───────────────────────────── */
+    function renderBooks(books, container, query, isLast) {
+      const head = document.createElement('div');
+      head.className = 'results-head';
+      head.innerHTML = `
+        <span class="results-title">${isLast ? 'From your last search' : `${books.length} books chosen for you`}</span>
+      `;
+      container.appendChild(head);
+
+      books.forEach((b, i) => {
+        const card = document.createElement('div');
+        card.className = 'book-card';
+
+        const tags = (b.vibeTags || []).map(t => `<span class="vibe-tag">${esc(t)}</span>`).join('');
+        const goodreadsHref = `https://www.goodreads.com/search?q=${encodeURIComponent(b.title + ' ' + b.author)}`;
+        const amazonHref    = `https://www.amazon.com/s?k=${encodeURIComponent(b.title + ' ' + b.author)}&i=stripbooks`;
+
+        card.innerHTML = `
+          <div class="card-cover-wrap">
+            <a class="cover-link" href="${goodreadsHref}" target="_blank" rel="noopener noreferrer" title="View on Goodreads">
+              <div class="cover-placeholder">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--c-ink-faint)" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M4 19.5A2.5 2.5 0 016.5 17H20"/>
+                  <path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/>
+                </svg>
+              </div>
+              <img class="cover-img" src="" alt="${esc(b.title)} cover">
+            </a>
+          </div>
+          <div class="card-header">
+            <span class="card-eyebrow">${isLast ? 'Previously recommended' : `Pick ${i + 1} of ${books.length}`}</span>
+            <a class="card-title-link" href="${goodreadsHref}" target="_blank" rel="noopener noreferrer">
+              <div class="card-title">${esc(b.title)}</div>
+            </a>
+            <div class="card-author">by ${esc(b.author)}</div>
+            <div class="ratings-row">
+              <span class="rating-badge rating-ol" data-rating="ol">
+                <span class="rating-source">Open Library</span>
+                <span class="rating-val">\u2026</span>
+              </span>
+              <a class="rating-link goodreads-link" href="${goodreadsHref}" target="_blank" rel="noopener noreferrer">Goodreads \u2197</a>
+              <a class="rating-link amazon-link" href="${amazonHref}" target="_blank" rel="noopener noreferrer">Amazon \u2197</a>
+            </div>
+          </div>
+          <div class="card-rule"></div>
+          <p class="card-summary">${esc(b.summary || '')}</p>
+          ${b.whyThisMatchesYou ? `
+            <span class="card-match-label">Why this matches you</span>
+            <p class="card-match">${esc(b.whyThisMatchesYou)}</p>
+          ` : ''}
+          ${tags ? `<div class="vibe-tags">${tags}</div>` : ''}
+        `;
+
+        container.appendChild(card);
+        requestAnimationFrame(() => {
+          setTimeout(() => card.classList.add('in'), isLast ? 60 * i : 90 * i);
+        });
+      });
+    }
+
+    /* ─── Last search ─────────────────────────────────── */
+    function loadLast() {
+      const raw = localStorage.getItem('nextread_last');
+      if (!raw) return;
+
+      try {
+        const { q, books } = JSON.parse(raw);
+        if (!books?.length) return;
+
+        document.getElementById('lastQuery').textContent = `\u201C${q}\u201D`;
+        const el = document.getElementById('lastResults');
+        el.innerHTML = '';
+        renderBooks(books, el, q, true);
+        enrichCards(books, el);
+
+        setTimeout(() => el.querySelectorAll('.book-card').forEach(c => c.classList.add('in')), 80);
+        document.getElementById('lastSearch').classList.add('show');
+      } catch { /* ignore */ }
+    }
+
+    function clearLast() {
+      localStorage.removeItem('nextread_last');
+      document.getElementById('lastSearch').classList.remove('show');
+    }
+
+    /* ─── UI helpers ──────────────────────────────────── */
+    function setLoading(on) {
+      document.getElementById('loading').classList.toggle('show', on);
+      const btn = document.getElementById('findBtn');
+      btn.disabled = on;
+      btn.textContent = on ? 'Finding\u2026' : 'Find my next read';
+    }
+
+    function showErr(msg) {
+      const b = document.getElementById('errorBox');
+      b.textContent = msg;
+      b.classList.add('show');
+      b.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+
+    function clearErr() {
+      document.getElementById('errorBox').classList.remove('show');
+    }
+
+    function toast(msg) {
+      const el = document.getElementById('toast');
+      el.textContent = msg;
+      el.classList.add('show');
+      setTimeout(() => el.classList.remove('show'), 2600);
+    }
+
+    function esc(s) {
+      const d = document.createElement('div');
+      d.textContent = String(s || '');
+      return d.innerHTML;
+    }
+  </script>
+
+</body>
+</html>
