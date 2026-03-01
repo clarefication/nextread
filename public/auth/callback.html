@@ -77,21 +77,41 @@
         const { supabaseUrl, supabaseAnonKey } = await configRes.json();
         const sb = createClient(supabaseUrl, supabaseAnonKey);
 
-        // Extract the auth code from the URL
+        // Check for PKCE code in query params
         const params = new URLSearchParams(window.location.search);
         const code = params.get('code');
 
-        if (!code) {
-          // No code in URL — session may already be established, just redirect
-          window.location.href = '/';
-          return;
+        // Check for implicit flow tokens in hash fragment
+        const hashParams = new URLSearchParams(window.location.hash.substring(1));
+        const accessToken = hashParams.get('access_token');
+        const refreshToken = hashParams.get('refresh_token');
+
+        let session = null;
+
+        if (code) {
+          // PKCE flow — exchange code for session
+          const { data, error } = await sb.auth.exchangeCodeForSession(code);
+          if (error) throw error;
+          session = data.session;
+        } else if (accessToken) {
+          // Implicit flow — set session from hash tokens
+          const { data, error } = await sb.auth.setSession({
+            access_token: accessToken,
+            refresh_token: refreshToken,
+          });
+          if (error) throw error;
+          session = data.session;
+        } else {
+          // No auth params — check if session already exists
+          const { data: { session: existing } } = await sb.auth.getSession();
+          if (existing) {
+            window.location.href = '/';
+            return;
+          }
+          throw new Error('No authentication credentials found in URL');
         }
 
-        const { data, error } = await sb.auth.exchangeCodeForSession(code);
-
-        if (error) throw error;
-
-        const newUserId = data.session?.user?.id;
+        const newUserId = session?.user?.id;
         const oldUserId = localStorage.getItem('nextread_old_anon_id');
 
         // Merge anonymous data if we have a different old ID
@@ -101,7 +121,7 @@
               method: 'POST',
               headers: {
                 'Content-Type': 'application/json',
-                'Authorization': `Bearer ${data.session.access_token}`,
+                'Authorization': `Bearer ${session.access_token}`,
               },
               body: JSON.stringify({ oldUserId }),
             });
