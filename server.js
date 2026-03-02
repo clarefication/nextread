@@ -44,5 +44,5 @@ app.get('/stats/script.js', require('./api/stats/script'));
 app.post('/stats/send', require('./api/stats/send'));
 
 app.listen(PORT, () => {
-  console.log(`Pick Me Up running at http://localhost:${PORT}`);
+  console.log(`Between Books running at http://localhost:${PORT}`);
 });

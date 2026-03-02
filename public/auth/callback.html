@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Pick Me Up — Signing in...</title>
+  <title>Between Books — Signing in...</title>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     body {
@@ -112,7 +112,7 @@
         }
 
         const newUserId = session?.user?.id;
-        const oldUserId = localStorage.getItem('nextread_old_anon_id');
+        const oldUserId = localStorage.getItem('betweenbooks_old_anon_id');
 
         // Merge anonymous data if we have a different old ID
         if (oldUserId && newUserId && oldUserId !== newUserId) {
@@ -128,7 +128,7 @@
           } catch {
             // Merge failure is non-fatal — user still gets signed in
           }
-          localStorage.removeItem('nextread_old_anon_id');
+          localStorage.removeItem('betweenbooks_old_anon_id');
         }
 
         // Redirect home

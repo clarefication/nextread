@@ -3,12 +3,12 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Pick Me Up — Your Next Read (Beta)</title>
+  <title>Between Books — Find Your Next Read (Beta)</title>
 
   <!--
   ╔══════════════════════════════════════════════════════╗
-  ║                  PICK ME UP                           ║
-  ║         Your Next Read — Book Recommendations        ║
+  ║                BETWEEN BOOKS                          ║
+  ║         Find Your Next Read — Book Recommendations  ║
   ╠══════════════════════════════════════════════════════╣
   ║  HOW TO RUN:                                         ║
   ║                                                      ║
@@ -209,7 +209,6 @@
 
     h1 .italic {
       font-style: italic;
-      color: var(--c-amber);
     }
 
     .hero-sub {
@@ -1496,7 +1495,7 @@
 
   <!-- Top bar -->
   <nav class="topbar">
-    <a class="topbar-brand" onclick="showView('home')">Pick Me Up <span class="beta-badge">Beta</span></a>
+    <a class="topbar-brand" onclick="showView('home')">Between Books <span class="beta-badge">Beta</span></a>
     <div class="topbar-nav hidden" id="topbarNav">
       <button class="nav-link active" data-view="home">Search</button>
       <button class="nav-link" data-view="saved">Reading List</button>
@@ -1527,10 +1526,10 @@
   <div class="welcome-overlay" id="welcomeOverlay" onclick="if(event.target===this)dismissWelcome()">
     <div class="welcome-card">
       <button class="login-close" onclick="dismissWelcome()">&times;</button>
-      <h2 class="welcome-title"><span style="font-style:italic;color:var(--c-amber)">Pick Me Up</span> <span class="beta-badge">Beta</span></h2>
-      <p class="welcome-subtitle">Your Next Read</p>
+      <h2 class="welcome-title"><span style="font-style:italic;color:var(--c-amber)">Between Books</span> <span class="beta-badge">Beta</span></h2>
+      <p class="welcome-subtitle">Find your next read</p>
       <div class="welcome-rule"></div>
-      <p class="welcome-body">Everyone needs a pick-me-up sometimes. Ours just happen to come with pages. Tell us how you're feeling, and we'll find the book that meets you there — a quiet companion, a jolt of energy, or a world to disappear into.</p>
+      <p class="welcome-body">That feeling between finishing one book and not knowing what to read next — we've got you. Tell us how you're feeling, and we'll find the book that meets you there — a quiet companion, a jolt of energy, or a world to disappear into.</p>
       <div class="welcome-actions">
         <button class="btn-primary welcome-enter" onclick="dismissWelcome()">Start browsing</button>
         <label class="welcome-dismiss-label">
@@ -1547,9 +1546,9 @@
 
     <!-- Hero -->
     <header>
-      <span class="hero-eyebrow">when you need a lift, pick up a book</span>
-      <h1><span class="italic">Pick Me Up</span></h1>
-      <p class="hero-sub">Your Next Read</p>
+      <span class="hero-eyebrow">for the space between one book and the next</span>
+      <h1>Between <span class="italic">Books</span></h1>
+      <p class="hero-sub">Find your next read</p>
       <p class="hero-tagline">Books chosen for you, not for everyone.</p>
       <div class="hero-rule"></div>
     </header>
@@ -1626,7 +1625,7 @@
 
       <div class="actions">
         <button class="btn-primary" id="findBtn" onclick="findBooks()">
-          Pick me up
+          Find my next read
         </button>
         <button class="btn-ghost" onclick="surpriseMe()">
           Surprise me
@@ -1689,7 +1688,7 @@
     </div>
 
     <footer>
-      <p>Pick Me Up &middot; Books chosen with care, not by committee</p>
+      <p>Between Books &middot; Books chosen with care, not by committee</p>
       <p class="affiliate-disclaimer">As an Amazon Associate, I earn from qualifying purchases. Book links may be affiliate links.</p>
     </footer>
 
@@ -1808,7 +1807,7 @@
 
       // Store old anonymous user ID before sign-in
       if (sbSession?.user?.is_anonymous) {
-        localStorage.setItem('nextread_old_anon_id', sbSession.user.id);
+        localStorage.setItem('betweenbooks_old_anon_id', sbSession.user.id);
       }
 
       try {
@@ -1849,7 +1848,7 @@
       const dontShow = document.getElementById('welcomeDontShow').checked;
       document.getElementById('welcomeOverlay').classList.remove('show');
       if (dontShow) {
-        localStorage.setItem('pickmeup_welcome_dismissed', '1');
+        localStorage.setItem('betweenbooks_welcome_dismissed', '1');
       }
       trackEvent('welcome_dismiss', { dont_show_again: dontShow });
     }
@@ -2211,7 +2210,7 @@
 
     /* ─── State ───────────────────────────────────────── */
     const genres = new Set();
-    const HISTORY_KEY = 'nextread_history';
+    const HISTORY_KEY = 'betweenbooks_history';
     const HISTORY_MAX = 60;
 
     function getPastRecommendations() {
@@ -2311,7 +2310,7 @@
       initSupabase();
 
       // Show welcome popup if not dismissed
-      if (!localStorage.getItem('pickmeup_welcome_dismissed')) {
+      if (!localStorage.getItem('betweenbooks_welcome_dismissed')) {
         document.getElementById('welcomeOverlay').classList.add('show');
       }
     });
@@ -2534,7 +2533,7 @@ vibeTags must be evocative and specific (e.g. "melancholic", "darkly comic", "sl
         renderBooks(books, container, q, false, personalized);
         enrichCards(books, container);
 
-        localStorage.setItem('nextread_last', JSON.stringify({ q, books }));
+        localStorage.setItem('betweenbooks_last', JSON.stringify({ q, books }));
         savePastRecommendations(books);
 
         setTimeout(() => container.scrollIntoView({ behavior: 'smooth', block: 'start' }), 150);
@@ -2659,7 +2658,7 @@ vibeTags must be evocative and specific (e.g. "melancholic", "darkly comic", "sl
 
     /* ─── Last search ─────────────────────────────────── */
     function loadLast() {
-      const raw = localStorage.getItem('nextread_last');
+      const raw = localStorage.getItem('betweenbooks_last');
       if (!raw) return;
 
       try {
@@ -2678,7 +2677,7 @@ vibeTags must be evocative and specific (e.g. "melancholic", "darkly comic", "sl
     }
 
     function clearLast() {
-      localStorage.removeItem('nextread_last');
+      localStorage.removeItem('betweenbooks_last');
       document.getElementById('lastSearch').classList.remove('show');
     }
     window.clearLast = clearLast;
@@ -2688,7 +2687,7 @@ vibeTags must be evocative and specific (e.g. "melancholic", "darkly comic", "sl
       document.getElementById('loading').classList.toggle('show', on);
       const btn = document.getElementById('findBtn');
       btn.disabled = on;
-      btn.textContent = on ? 'Finding\u2026' : 'Pick me up';
+      btn.textContent = on ? 'Finding\u2026' : 'Find my next read';
     }
 
     function showErr(msg) {

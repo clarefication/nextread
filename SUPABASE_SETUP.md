@@ -1,4 +1,4 @@
-# Supabase Setup Guide — Next Read
+# Supabase Setup Guide — Between Books
 
 ## 1. Create a Supabase Project
 
@@ -33,7 +33,7 @@ This creates:
    - `https://nextread-ecru.vercel.app/auth/callback.html`
 
 ### Email Templates (optional)
-Customize the magic link email under **Authentication > Email Templates** to match the Next Read brand.
+Customize the magic link email under **Authentication > Email Templates** to match the Between Books brand.
 
 ## 4. Set Environment Variables
 

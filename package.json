@@ -1,5 +1,5 @@
 {
-  "name": "nextread",
+  "name": "between-books",
   "version": "1.0.0",
   "description": "Taste-based book recommendations powered by Claude",
   "main": "server.js",
