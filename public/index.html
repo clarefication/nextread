@@ -1779,6 +1779,7 @@
     function showLoginUI() {
       document.getElementById('loginOverlay').classList.add('show');
       document.getElementById('loginEmail').focus();
+      trackEvent('sign_in_click');
     }
 
     function closeLoginUI() {
@@ -1812,6 +1813,7 @@
 
         statusEl.style.color = 'var(--c-sage)';
         statusEl.textContent = 'Check your email for a magic link!';
+        trackEvent('magic_link_sent');
         document.getElementById('loginEmail').value = '';
       } catch (err) {
         statusEl.style.color = 'var(--c-err)';
@@ -1833,14 +1835,17 @@
       showView('home');
       updateAuthUI();
       toast('Logged out');
+      trackEvent('logout');
     }
 
     /* ─── Welcome popup ─────────────────────────────────── */
     function dismissWelcome() {
+      const dontShow = document.getElementById('welcomeDontShow').checked;
       document.getElementById('welcomeOverlay').classList.remove('show');
-      if (document.getElementById('welcomeDontShow').checked) {
+      if (dontShow) {
         localStorage.setItem('pickmeup_welcome_dismissed', '1');
       }
+      trackEvent('welcome_dismiss', { dont_show_again: dontShow });
     }
     window.dismissWelcome = dismissWelcome;
 
@@ -1866,6 +1871,8 @@
       document.querySelectorAll('.nav-link').forEach(l => {
         l.classList.toggle('active', l.dataset.view === name);
       });
+
+      if (name !== 'home') trackEvent('view_navigate', { view: name });
 
       // Load data for the view
       if (name === 'saved') loadSavedBooks();
@@ -2067,6 +2074,7 @@
         });
         if (!res.ok) throw new Error('Failed');
         toast('Preferences saved');
+        trackEvent('preferences_saved', { likes: likes.length, dislikes: dislikes.length });
       } catch {
         toast('Could not save preferences');
       } finally {
@@ -2187,6 +2195,7 @@
     }
 
     function rerunSearch(queryText) {
+      trackEvent('search_again', { query: queryText.substring(0, 100) });
       showView('home');
       const textarea = document.getElementById('moodInput');
       textarea.value = queryText;
@@ -2305,11 +2314,20 @@
       if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') findBooks();
     });
 
+    // Track affiliate link clicks
+    document.addEventListener('click', e => {
+      const link = e.target.closest('.amazon-link, .goodreads-link, .history-book-title');
+      if (!link) return;
+      const isAmazon = link.classList.contains('amazon-link') || link.href?.includes('amazon.com');
+      trackEvent(isAmazon ? 'amazon_click' : 'goodreads_click', { url: link.href?.substring(0, 120) });
+    });
+
     /* ─── Surprise me ─────────────────────────────────── */
     function surpriseMe() {
       const t = document.getElementById('moodInput');
       t.value = SURPRISE[Math.floor(Math.random() * SURPRISE.length)];
       t.focus();
+      trackEvent('surprise_me');
     }
     window.surpriseMe = surpriseMe;
 
@@ -2447,6 +2465,7 @@ vibeTags must be evocative and specific (e.g. "melancholic", "darkly comic", "sl
       clearErr();
       setLoading(true);
       document.getElementById('results').innerHTML = '';
+      trackEvent('search', { query: mood.substring(0, 100) });
 
       const q = mood;
 
@@ -2605,6 +2624,7 @@ vibeTags must be evocative and specific (e.g. "melancholic", "darkly comic", "sl
           const type = isActive ? 'like' : 'dislike';
           recordInteraction(b.title, b.author, type);
           toast(isActive ? 'Noted! This trains your future picks.' : 'Preference removed');
+          trackEvent('like', { title: b.title, active: isActive });
         });
 
         saveBtn.addEventListener('click', () => {
@@ -2617,8 +2637,10 @@ vibeTags must be evocative and specific (e.g. "melancholic", "darkly comic", "sl
           if (isActive) {
             recordInteraction(b.title, b.author, 'save');
             toast('Added to your reading list');
+            trackEvent('save', { title: b.title });
           } else {
             toast('Removed from reading list');
+            trackEvent('unsave', { title: b.title });
           }
         });
 
@@ -2689,5 +2711,9 @@ vibeTags must be evocative and specific (e.g. "melancholic", "darkly comic", "sl
   </script>
 
   <script defer src="/_vercel/insights/script.js"></script>
+  <script>
+    window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };
+    function trackEvent(name, props) { window.va('event', { name, ...props }); }
+  </script>
 </body>
 </html>
