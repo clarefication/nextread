@@ -1723,6 +1723,16 @@
       border-color: rgba(212, 160, 84, 0.3);
       background: var(--c-amber-faint);
     }
+    .card-read-label {
+      display: flex;
+      align-items: center;
+      font-size: 0.72rem;
+      color: var(--c-ink-soft);
+      white-space: nowrap;
+      border-left: 1px solid var(--c-border);
+      padding-left: 12px;
+      margin-left: 4px;
+    }
     .card-action-btn.active-read {
       color: var(--c-sage);
       border-color: rgba(122, 154, 124, 0.3);
@@ -3333,12 +3343,13 @@ vibeTags must be evocative and specific (e.g. "melancholic", "darkly comic", "sl
               </svg>
               Save
             </button>
+            <span class="card-read-label">Already read this book?</span>
             <button class="card-action-btn read-btn" title="I've read this and enjoyed it">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M14 9V5a3 3 0 00-3-3l-4 9v11h11.28a2 2 0 002-1.7l1.38-9a2 2 0 00-2-2.3H14z"/>
                 <path d="M7 22H4a2 2 0 01-2-2v-7a2 2 0 012-2h3"/>
               </svg>
-              Read it
+              Yes, loved it
             </button>
             <button class="card-action-btn read-no-btn" title="I've read this but didn't enjoy it">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
