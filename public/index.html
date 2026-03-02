@@ -2492,6 +2492,8 @@
 
     /* ─── Init ────────────────────────────────────────── */
     document.addEventListener('DOMContentLoaded', () => {
+      document.getElementById('findBtn').textContent = nextBtnPhrase();
+
       document.querySelectorAll('.chip').forEach(el => {
         el.addEventListener('click', () => {
           const g = el.dataset.g;
@@ -2877,11 +2879,41 @@ vibeTags must be evocative and specific (e.g. "melancholic", "darkly comic", "sl
     window.clearLast = clearLast;
 
     /* ─── UI helpers ──────────────────────────────────── */
+    const BTN_PHRASES = [
+      'Take me somewhere new',
+      'Find my next obsession',
+      "I'm ready to get lost",
+      'Pick something for me',
+      'Just one more chapter',
+      'Open a new world',
+      'I need a good book',
+      'Surprise my shelves',
+      'What should I read next?',
+      'Read my mind',
+      'Cure my book hangover',
+      'One book, infinite escape',
+      'My TBR needs help',
+      'Point me to the pages',
+      'Give me something to talk about',
+      'Find me a new favourite',
+      'I have time to kill',
+      'Transport me',
+      'Something good, please',
+    ];
+    let _lastPhraseIdx = 0;
+    function nextBtnPhrase() {
+      let idx;
+      do { idx = Math.floor(Math.random() * BTN_PHRASES.length); }
+      while (idx === _lastPhraseIdx);
+      _lastPhraseIdx = idx;
+      return BTN_PHRASES[idx];
+    }
+
     function setLoading(on) {
       document.getElementById('loading').classList.toggle('show', on);
       const btn = document.getElementById('findBtn');
       btn.disabled = on;
-      btn.textContent = on ? 'Finding\u2026' : 'Take me somewhere new';
+      btn.textContent = on ? 'Finding\u2026' : nextBtnPhrase();
     }
 
     function showErr(msg) {
