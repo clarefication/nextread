@@ -463,15 +463,16 @@
 
     .btn-primary {
       flex: 1;
-      font-family: var(--f-body);
-      font-size: 1rem;
-      font-weight: 500;
-      letter-spacing: 0.03em;
-      color: var(--c-bg);
-      background: var(--c-amber);
-      border: none;
-      border-radius: var(--r-sm);
-      padding: 16px 24px;
+      font-family: var(--f-display);
+      font-style: italic;
+      font-size: 1.05rem;
+      font-weight: 400;
+      letter-spacing: 0.02em;
+      color: var(--c-amber);
+      background: transparent;
+      border: 1.5px solid var(--c-amber);
+      border-radius: 999px;
+      padding: 15px 28px;
       cursor: pointer;
       transition: all var(--ease);
       display: flex;
@@ -480,37 +481,24 @@
       gap: 8px;
     }
     .btn-primary:hover:not(:disabled) {
-      background: var(--c-amber);
-      filter: brightness(1.12);
+      background: var(--c-amber-faint);
       transform: translateY(-1px);
       box-shadow: 0 8px 28px var(--c-amber-glow);
     }
     .btn-primary:active:not(:disabled) { transform: translateY(0); }
     .btn-primary:disabled { opacity: .5; cursor: not-allowed; }
 
-    /* Find button — pill shape with sunset gradient */
-    #findBtn {
-      border-radius: 999px;
-      background: linear-gradient(135deg, #E8923C 0%, #C44830 55%, #8C2A1E 100%);
-      box-shadow: 0 4px 20px rgba(196, 72, 48, 0.35);
-      letter-spacing: 0.04em;
-    }
-    #findBtn:hover:not(:disabled) {
-      filter: brightness(1.1);
-      box-shadow: 0 8px 32px rgba(196, 72, 48, 0.5);
-      background: linear-gradient(135deg, #E8923C 0%, #C44830 55%, #8C2A1E 100%);
-    }
-
     .btn-ghost {
-      font-family: var(--f-body);
-      font-size: 0.85rem;
+      font-family: var(--f-display);
+      font-style: italic;
+      font-size: 1rem;
       font-weight: 400;
-      letter-spacing: 0.04em;
+      letter-spacing: 0.02em;
       color: var(--c-ink-mid);
-      background: none;
-      border: 1px solid var(--c-border);
-      border-radius: var(--r-sm);
-      padding: 16px 20px;
+      background: transparent;
+      border: 1.5px solid var(--c-border);
+      border-radius: 999px;
+      padding: 15px 24px;
       cursor: pointer;
       transition: all var(--ease);
       white-space: nowrap;
@@ -807,11 +795,11 @@
     }
 
     .btn-text {
-      font-family: var(--f-body);
-      font-size: 0.72rem;
+      font-family: var(--f-display);
+      font-style: italic;
+      font-size: 0.85rem;
       font-weight: 400;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
+      letter-spacing: 0.03em;
       color: var(--c-ink-soft);
       background: none;
       border: none;
@@ -1337,22 +1325,23 @@
     }
 
     .btn-auth {
-      font-family: var(--f-body);
-      font-size: 0.72rem;
+      font-family: var(--f-display);
+      font-style: italic;
+      font-size: 0.82rem;
       font-weight: 400;
-      letter-spacing: 0.04em;
+      letter-spacing: 0.02em;
       color: var(--c-amber);
-      background: var(--c-amber-faint);
-      border: 1px solid rgba(212, 160, 84, 0.2);
-      border-radius: 100px;
+      background: transparent;
+      border: 1.5px solid var(--c-amber);
+      border-radius: 999px;
       padding: 5px 14px;
       cursor: pointer;
       transition: all var(--ease);
       white-space: nowrap;
     }
     .btn-auth:hover {
-      background: rgba(212, 160, 84, 0.15);
-      border-color: var(--c-amber-mid);
+      background: var(--c-amber-faint);
+      border-color: var(--c-amber);
     }
 
     /* ─── Login modal ──────────────────────────────── */
