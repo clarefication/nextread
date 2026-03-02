@@ -3161,7 +3161,7 @@ vibeTags must be evocative and specific (e.g. "melancholic", "darkly comic", "sl
     async function recordInteraction(title, author, type, coverUrl) {
       if (!sbSession?.access_token) return;
       try {
-        await fetch('/api/interaction', {
+        const res = await fetch('/api/interaction', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
           body: JSON.stringify({
@@ -3171,7 +3171,8 @@ vibeTags must be evocative and specific (e.g. "melancholic", "darkly comic", "sl
             interaction_type: type,
           }),
         });
-      } catch { /* non-fatal */ }
+        if (!res.ok) console.warn('recordInteraction failed:', type, await res.json().catch(() => ({})));
+      } catch (e) { console.warn('recordInteraction error:', e); }
     }
 
     /* ─── API call ────────────────────────────────────── */
