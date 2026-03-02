@@ -2710,10 +2710,11 @@ vibeTags must be evocative and specific (e.g. "melancholic", "darkly comic", "sl
     }
   </script>
 
-  <script defer src="/_vercel/insights/script.js"></script>
+  <script defer src="https://cloud.umami.is/script.js" data-website-id="2daa1420-fbe4-4634-8bba-eb7d66619662"></script>
   <script>
-    window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };
-    function trackEvent(name, props) { window.va('event', { name, ...props }); }
+    function trackEvent(name, props) {
+      if (window.umami) window.umami.track(name, props);
+    }
   </script>
 </body>
 </html>
