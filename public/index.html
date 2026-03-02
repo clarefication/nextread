@@ -84,10 +84,6 @@
       font-weight: 300;
       line-height: 1.7;
       min-height: 100vh;
-      background-image:
-        radial-gradient(ellipse 80% 60% at 20% 50%, rgba(212,160,84,.03) 0%, transparent 60%),
-        radial-gradient(ellipse 60% 50% at 80% 20%, rgba(122,154,124,.02) 0%, transparent 55%),
-        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23noise)' opacity='.03'/%3E%3C/svg%3E");
     }
 
     ::selection {
@@ -1489,9 +1485,180 @@
       height: 14px;
       flex-shrink: 0;
     }
+
+    /* ─── Moving Aura Background ──────────────────────── */
+    #aura-root {
+      position: fixed;
+      inset: 0;
+      z-index: -10;
+      overflow: hidden;
+      background: #0C0B09;
+      pointer-events: none;
+    }
+
+    .aura-orb {
+      position: absolute;
+      border-radius: 50%;
+      pointer-events: none;
+      will-change: transform;
+    }
+
+    /* Orb 1 — deep sienna, upper-left */
+    .orb-1 {
+      width: 75vmax; height: 75vmax;
+      top: -25%; left: -20%;
+      background: radial-gradient(circle, rgba(138,52,20,0.78) 0%, rgba(105,35,12,0.35) 40%, transparent 70%);
+      filter: blur(80px);
+      animation: drift-1 38s ease-in-out infinite;
+    }
+
+    /* Orb 2 — auburn/rust, right side */
+    .orb-2 {
+      width: 58vmax; height: 58vmax;
+      top: 20%; right: -22%;
+      background: radial-gradient(circle, rgba(160,62,28,0.70) 0%, rgba(122,42,18,0.30) 40%, transparent 70%);
+      filter: blur(70px);
+      animation: drift-2 45s ease-in-out infinite;
+    }
+
+    /* Orb 3 — warm amber/honey, mid-canvas */
+    .orb-3 {
+      width: 62vmax; height: 62vmax;
+      top: 40%; left: 28%;
+      background: radial-gradient(circle, rgba(194,122,38,0.52) 0%, rgba(162,94,22,0.24) 40%, transparent 70%);
+      filter: blur(90px);
+      animation: drift-3 52s ease-in-out infinite;
+    }
+
+    /* Orb 4 — blush/dusty rose, top-center */
+    .orb-4 {
+      width: 52vmax; height: 52vmax;
+      top: -18%; left: 42%;
+      background: radial-gradient(circle, rgba(178,92,78,0.58) 0%, rgba(148,68,58,0.24) 40%, transparent 70%);
+      filter: blur(75px);
+      animation: drift-4 33s ease-in-out infinite;
+    }
+
+    /* Orb 5 — terracotta/burnt orange, lower-left */
+    .orb-5 {
+      width: 68vmax; height: 68vmax;
+      top: 52%; left: -8%;
+      background: radial-gradient(circle, rgba(152,66,28,0.64) 0%, rgba(118,48,16,0.28) 40%, transparent 70%);
+      filter: blur(85px);
+      animation: drift-5 43s ease-in-out infinite;
+    }
+
+    @keyframes drift-1 {
+      0%,100% { transform: translate(0,0) scale(1); }
+      25%      { transform: translate(9%,13%) scale(1.04); }
+      50%      { transform: translate(16%,5%) scale(0.96); }
+      75%      { transform: translate(5%,16%) scale(1.03); }
+    }
+    @keyframes drift-2 {
+      0%,100% { transform: translate(0,0) scale(1); }
+      30%     { transform: translate(-11%,9%) scale(1.05); }
+      60%     { transform: translate(-5%,16%) scale(0.96); }
+      80%     { transform: translate(-13%,4%) scale(1.03); }
+    }
+    @keyframes drift-3 {
+      0%,100% { transform: translate(0,0) scale(1); }
+      20%     { transform: translate(-9%,-7%) scale(1.06); }
+      50%     { transform: translate(7%,-11%) scale(0.94); }
+      80%     { transform: translate(-4%,9%) scale(1.04); }
+    }
+    @keyframes drift-4 {
+      0%,100% { transform: translate(0,0) scale(1); }
+      35%     { transform: translate(-13%,11%) scale(1.06); }
+      65%     { transform: translate(9%,15%) scale(0.95); }
+    }
+    @keyframes drift-5 {
+      0%,100% { transform: translate(0,0) scale(1); }
+      25%     { transform: translate(11%,-9%) scale(1.04); }
+      55%     { transform: translate(7%,-16%) scale(0.96); }
+      75%     { transform: translate(15%,-6%) scale(1.05); }
+    }
+
+    /* Grain overlay */
+    #aura-grain {
+      position: fixed;
+      inset: 0;
+      z-index: -9;
+      pointer-events: none;
+      opacity: 0.038;
+      background-repeat: repeat;
+      background-size: 200px 200px;
+      animation: grain-jitter 0.45s steps(1) infinite;
+    }
+    @keyframes grain-jitter {
+      0%  { background-position:   0px   0px; }
+      11% { background-position: -44px -32px; }
+      22% { background-position:  28px -60px; }
+      33% { background-position: -18px  49px; }
+      44% { background-position:  55px  18px; }
+      55% { background-position: -36px -25px; }
+      66% { background-position:  17px  63px; }
+      77% { background-position: -63px  27px; }
+      88% { background-position:  42px -48px; }
+    }
+
+    /* Vignette — darkens edges, keeps centre readable */
+    #aura-vignette {
+      position: fixed;
+      inset: 0;
+      z-index: -8;
+      pointer-events: none;
+      background: radial-gradient(
+        ellipse 90% 80% at 50% 50%,
+        transparent 28%,
+        rgba(4, 2, 1, 0.52) 100%
+      );
+    }
+
+    /* Light mode — airy, not washed out */
+    @media (prefers-color-scheme: light) {
+      #aura-root { background: #110804; }
+      .orb-1 { opacity: 0.75; }
+      .orb-2 { opacity: 0.68; }
+      .orb-3 { opacity: 0.58; }
+      .orb-4 { opacity: 0.62; }
+      .orb-5 { opacity: 0.70; }
+      #aura-vignette {
+        background: radial-gradient(
+          ellipse 90% 80% at 50% 50%,
+          transparent 28%,
+          rgba(6, 3, 1, 0.42) 100%
+        );
+      }
+    }
+
+    /* Mobile — lighter blur for GPU budget */
+    @media (max-width: 768px) {
+      .orb-1 { filter: blur(48px); }
+      .orb-2 { filter: blur(44px); }
+      .orb-3 { filter: blur(55px); }
+      .orb-4 { filter: blur(46px); }
+      .orb-5 { filter: blur(52px); }
+    }
+
+    /* Reduced motion — freeze all animation, keep static glow */
+    @media (prefers-reduced-motion: reduce) {
+      .aura-orb   { animation: none !important; }
+      #aura-grain { animation: none !important; }
+    }
   </style>
 </head>
 <body>
+
+  <!-- Aura background system -->
+  <div id="aura-root" aria-hidden="true">
+    <div class="aura-orb orb-1"></div>
+    <div class="aura-orb orb-2"></div>
+    <div class="aura-orb orb-3"></div>
+    <div class="aura-orb orb-4"></div>
+    <div class="aura-orb orb-5"></div>
+  </div>
+  <div id="aura-grain" aria-hidden="true"></div>
+  <div id="aura-vignette" aria-hidden="true"></div>
 
   <!-- Top bar -->
   <nav class="topbar">
@@ -2713,6 +2880,24 @@ vibeTags must be evocative and specific (e.g. "melancholic", "darkly comic", "sl
       d.textContent = String(s || '');
       return d.innerHTML;
     }
+
+    /* ─── Grain texture ────────────────────────────────── */
+    (function initGrain() {
+      const el = document.getElementById('aura-grain');
+      if (!el) return;
+      const size = 200;
+      const c = document.createElement('canvas');
+      c.width = c.height = size;
+      const ctx = c.getContext('2d');
+      const d = ctx.createImageData(size, size);
+      for (let i = 0; i < d.data.length; i += 4) {
+        const v = (Math.random() * 255) | 0;
+        d.data[i] = d.data[i + 1] = d.data[i + 2] = v;
+        d.data[i + 3] = 255;
+      }
+      ctx.putImageData(d, 0, 0);
+      el.style.backgroundImage = `url(${c.toDataURL()})`;
+    })();
   </script>
 
 </body>
