@@ -7,8 +7,8 @@ module.exports = async function handler(req, res) {
   if (auth.error) return res.status(401).json({ error: auth.error });
 
   const { supabase, user } = auth;
+  const type = req.query.type || 'save';
 
-  // Get all interactions, ordered newest first
   const { data, error } = await supabase
     .from('book_interactions')
     .select('book_id, title, author, cover_url, interaction_type, created_at')
@@ -17,17 +17,16 @@ module.exports = async function handler(req, res) {
 
   if (error) return res.status(500).json({ error: error.message });
 
-  // Keep only latest interaction per book, filter to saves only
   const latest = new Map();
   for (const row of data || []) {
     if (!latest.has(row.book_id)) latest.set(row.book_id, row);
   }
 
-  const books = [];
-  for (const row of latest.values()) {
-    if (row.interaction_type === 'save') {
-      books.push(row);
-    }
+  let books;
+  if (type === 'read') {
+    books = [...latest.values()].filter(b => b.interaction_type === 'read' || b.interaction_type === 'read-dislike');
+  } else {
+    books = [...latest.values()].filter(b => b.interaction_type === 'save');
   }
 
   res.json({ books });

@@ -2758,7 +2758,7 @@
       const el = document.getElementById('readBooksList');
       if (!el) return;
       try {
-        const res = await fetch('/api/read-books', { headers: getAuthHeaders() });
+        const res = await fetch('/api/saved-books?type=read', { headers: getAuthHeaders() });
         if (!res.ok) throw new Error();
         const { books } = await res.json();
         if (!books.length) {
