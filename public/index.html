@@ -638,6 +638,119 @@
       color: var(--c-ink-mid);
     }
 
+    /* ─── Search loading overlay ─────────────────────── */
+    #search-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 1100;
+      background: #0C0B09;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.4s ease;
+    }
+    #search-overlay.active {
+      opacity: 1;
+      pointer-events: all;
+    }
+
+    .so-inner {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      padding: 0 24px;
+      max-width: 520px;
+      width: 100%;
+    }
+
+    .so-book {
+      position: relative;
+      margin-bottom: 36px;
+    }
+    .so-book::before {
+      content: '';
+      position: absolute;
+      inset: -28px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(212,160,84,0.13) 0%, transparent 70%);
+      animation: soGlow 3.5s ease-in-out infinite;
+    }
+    .so-book svg {
+      display: block;
+      position: relative;
+      animation: soFloat 3.5s ease-in-out infinite;
+    }
+
+    @keyframes soFloat {
+      0%, 100% { transform: translateY(0px); }
+      50%       { transform: translateY(-10px); }
+    }
+    @keyframes soGlow {
+      0%, 100% { opacity: 0.5; transform: scale(0.95); }
+      50%       { opacity: 1;   transform: scale(1.05); }
+    }
+
+    .so-headline {
+      font-family: var(--f-display);
+      font-size: 1.5rem;
+      font-style: italic;
+      font-weight: 400;
+      color: var(--c-ink);
+      letter-spacing: -0.01em;
+      margin-bottom: 44px;
+    }
+
+    .so-quote-block { min-height: 88px; }
+
+    .so-quote {
+      font-family: var(--f-display);
+      font-size: 1rem;
+      font-style: italic;
+      color: var(--c-ink-mid);
+      line-height: 1.65;
+      margin-bottom: 10px;
+      opacity: 0;
+      transform: translateY(6px);
+      transition: opacity 0.45s ease, transform 0.45s ease;
+    }
+    .so-attr {
+      font-family: var(--f-body);
+      font-size: 0.75rem;
+      font-weight: 400;
+      color: var(--c-ink-faint);
+      letter-spacing: 0.06em;
+      opacity: 0;
+      transform: translateY(4px);
+      transition: opacity 0.45s ease 0.06s, transform 0.45s ease 0.06s;
+    }
+    .so-quote.visible { opacity: 1; transform: translateY(0); }
+    .so-attr.visible  { opacity: 1; transform: translateY(0); }
+
+    .so-progress {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: rgba(212,160,84,0.07);
+    }
+    .so-bar {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, var(--c-amber-mid), var(--c-amber));
+      border-radius: 0 2px 2px 0;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .so-book svg,
+      .so-book::before { animation: none !important; }
+      .so-bar          { transition: none !important; }
+    }
+
     /* ─── Results ────────────────────────────────────── */
     #results { margin-bottom: 0; }
 
@@ -1823,6 +1936,37 @@
   </div>
   <div id="aura-grain" aria-hidden="true"></div>
   <div id="aura-vignette" aria-hidden="true"></div>
+
+  <!-- Search loading overlay -->
+  <div id="search-overlay" role="status" aria-live="polite" aria-label="Finding book recommendations">
+    <div class="so-inner">
+      <div class="so-book" aria-hidden="true">
+        <svg width="72" height="52" viewBox="0 0 72 52" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M36 7 C28 7 14 9 6 13 L6 46 C14 42 28 40 36 41 Z"
+                fill="rgba(212,160,84,0.08)" stroke="rgba(212,160,84,0.55)" stroke-width="1.3" stroke-linejoin="round"/>
+          <path d="M36 7 C44 7 58 9 66 13 L66 46 C58 42 44 40 36 41 Z"
+                fill="rgba(212,160,84,0.06)" stroke="rgba(212,160,84,0.55)" stroke-width="1.3" stroke-linejoin="round"/>
+          <line x1="36" y1="7"  x2="36" y2="41" stroke="rgba(212,160,84,0.8)"  stroke-width="1.5" stroke-linecap="round"/>
+          <line x1="13" y1="20" x2="32" y2="19" stroke="rgba(212,160,84,0.22)" stroke-width="1.2" stroke-linecap="round"/>
+          <line x1="13" y1="25" x2="32" y2="24" stroke="rgba(212,160,84,0.22)" stroke-width="1.2" stroke-linecap="round"/>
+          <line x1="13" y1="30" x2="32" y2="29" stroke="rgba(212,160,84,0.22)" stroke-width="1.2" stroke-linecap="round"/>
+          <line x1="13" y1="35" x2="24" y2="34" stroke="rgba(212,160,84,0.22)" stroke-width="1.2" stroke-linecap="round"/>
+          <line x1="40" y1="19" x2="59" y2="20" stroke="rgba(212,160,84,0.22)" stroke-width="1.2" stroke-linecap="round"/>
+          <line x1="40" y1="24" x2="59" y2="25" stroke="rgba(212,160,84,0.22)" stroke-width="1.2" stroke-linecap="round"/>
+          <line x1="40" y1="29" x2="59" y2="30" stroke="rgba(212,160,84,0.22)" stroke-width="1.2" stroke-linecap="round"/>
+          <line x1="40" y1="34" x2="51" y2="35" stroke="rgba(212,160,84,0.22)" stroke-width="1.2" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <p class="so-headline">Finding your next read&hellip;</p>
+      <div class="so-quote-block">
+        <p class="so-quote" id="so-quote"></p>
+        <p class="so-attr"  id="so-attr"></p>
+      </div>
+    </div>
+    <div class="so-progress" aria-hidden="true">
+      <div class="so-bar" id="so-bar"></div>
+    </div>
+  </div>
 
   <!-- Top bar -->
   <nav class="topbar">
@@ -3218,11 +3362,78 @@ vibeTags must be evocative and specific (e.g. "melancholic", "darkly comic", "sl
       return BTN_PHRASES[idx];
     }
 
+    /* ─── Search loading overlay ─────────────────────── */
+    const SEARCH_QUOTES = [
+      { q: 'A reader lives a thousand lives before he dies. The man who never reads lives only one.', a: 'George R.R. Martin' },
+      { q: 'I have always imagined that Paradise will be a kind of library.',                         a: 'Jorge Luis Borges' },
+      { q: 'There is no friend as loyal as a book.',                                                  a: 'Ernest Hemingway' },
+      { q: 'We read to know we are not alone.',                                                       a: 'C.S. Lewis' },
+      { q: 'Until I feared I would lose it, I never loved to read. One does not love breathing.',     a: 'Harper Lee' },
+      { q: 'Books are a uniquely portable magic.',                                                    a: 'Stephen King' },
+      { q: 'A book must be the axe for the frozen sea within us.',                                    a: 'Franz Kafka' },
+      { q: 'Sleep is good, he said, and books are better.',                                           a: 'George R.R. Martin' },
+      { q: 'A room without books is like a body without a soul.',                                     a: 'Cicero' },
+      { q: 'Once you learn to read, you will be forever free.',                                       a: 'Frederick Douglass' },
+      { q: 'If you don\u2019t like to read, you haven\u2019t found the right book yet.',             a: 'J.K. Rowling' },
+      { q: 'I cannot live without books.',                                                            a: 'Thomas Jefferson' },
+      { q: 'Reading gives us someplace to go when we have to stay where we are.',                     a: 'Mason Cooley' },
+      { q: 'Not all those who wander are lost.',                                                      a: 'J.R.R. Tolkien' },
+      { q: 'So many books, so little time.',                                                          a: 'Frank Zappa' },
+    ];
+
+    let _soTimer = null, _soIdx = 0;
+
+    function _soShowQuote(idx) {
+      const qEl = document.getElementById('so-quote');
+      const aEl = document.getElementById('so-attr');
+      qEl.classList.remove('visible');
+      aEl.classList.remove('visible');
+      setTimeout(() => {
+        const { q, a } = SEARCH_QUOTES[idx];
+        qEl.textContent = '\u201C' + q + '\u201D';
+        aEl.textContent = '\u2014\u00a0' + a;
+        qEl.classList.add('visible');
+        aEl.classList.add('visible');
+      }, 420);
+    }
+
+    function _showSearchOverlay() {
+      const overlay = document.getElementById('search-overlay');
+      const bar     = document.getElementById('so-bar');
+      bar.style.transition = 'none';
+      bar.style.width = '0%';
+      overlay.classList.add('active');
+      // Double rAF ensures the 0% width is painted before the transition starts
+      requestAnimationFrame(() => requestAnimationFrame(() => {
+        bar.style.transition = 'width 3s cubic-bezier(0.1, 0.5, 0.3, 1)';
+        bar.style.width = '80%';
+      }));
+      _soIdx = Math.floor(Math.random() * SEARCH_QUOTES.length);
+      _soShowQuote(_soIdx);
+      _soTimer = setInterval(() => {
+        _soIdx = (_soIdx + 1) % SEARCH_QUOTES.length;
+        _soShowQuote(_soIdx);
+      }, 3500);
+    }
+
+    function _hideSearchOverlay() {
+      const overlay = document.getElementById('search-overlay');
+      const bar     = document.getElementById('so-bar');
+      clearInterval(_soTimer);
+      bar.style.transition = 'width 0.2s ease';
+      bar.style.width = '100%';
+      setTimeout(() => {
+        overlay.classList.remove('active');
+        setTimeout(() => { bar.style.transition = 'none'; bar.style.width = '0%'; }, 400);
+      }, 250);
+    }
+
     function setLoading(on) {
-      document.getElementById('loading').classList.toggle('show', on);
       const btn = document.getElementById('findBtn');
       btn.disabled = on;
       btn.textContent = on ? 'Finding\u2026' : nextBtnPhrase();
+      if (on) _showSearchOverlay();
+      else    _hideSearchOverlay();
     }
 
     function showErr(msg) {
