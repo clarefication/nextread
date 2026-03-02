@@ -2477,17 +2477,21 @@
     let _currentAccent = '#E07848';
     let _currentAccentMid = '#A85A30';
 
-    function applyTheme(paletteKey, intensity = 1.0) {
+    function applyTheme(paletteKey, intensity = 1.0, fast = false) {
       const palette = PALETTES[paletteKey] || PALETTES.warm;
       const base = PALETTES.warm;
+      const transDur = fast ? '0.6s' : '2s';
 
       // Hue-rotate: atmospheric secondary effect
       const hue = (palette.hue - base.hue) * intensity;
       const sat = base.sat + (palette.sat - base.sat) * intensity;
-      document.getElementById('aura-root').style.filter = `hue-rotate(${hue}deg) saturate(${sat})`;
+      const auraRoot = document.getElementById('aura-root');
+      auraRoot.style.transition = `filter ${transDur} cubic-bezier(0.4, 0, 0.2, 1)`;
+      auraRoot.style.filter = `hue-rotate(${hue}deg) saturate(${sat})`;
 
       // Mood orb: primary colour identity via screen blend
       const moodEl = document.getElementById('aura-mood');
+      moodEl.style.transition = `opacity ${transDur} cubic-bezier(0.4, 0, 0.2, 1), background-color ${transDur} cubic-bezier(0.4, 0, 0.2, 1)`;
       if (palette.glow) {
         moodEl.style.backgroundColor = palette.glow;
         moodEl.style.opacity = String((intensity * 0.65).toFixed(3));
@@ -2504,7 +2508,7 @@
       const targetMid    = [lerp(fromMid[0], toMid[0], intensity), lerp(fromMid[1], toMid[1], intensity), lerp(fromMid[2], toMid[2], intensity)];
 
       if (_themeRaf) cancelAnimationFrame(_themeRaf);
-      const duration = 1500;
+      const duration = fast ? 600 : 1500;
       const start = performance.now();
       const startAccent = hexToRgb(_currentAccent);
       const startMid    = hexToRgb(_currentAccentMid);
@@ -2949,8 +2953,8 @@
         clearTimeout(_moodDebounce);
         _moodDebounce = setTimeout(() => {
           const val = document.getElementById('moodInput').value;
-          if (val.length > 8) applyTheme(detectPalette(val), 0.35);
-        }, 600);
+          if (val.length > 5) applyTheme(detectPalette(val), 0.5, true);
+        }, 250);
       });
 
       // Show welcome popup if not dismissed
