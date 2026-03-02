@@ -8,6 +8,13 @@
     },
     "api/auth/*.js": {
       "maxDuration": 15
+    },
+    "api/stats/*.js": {
+      "maxDuration": 10
     }
-  }
+  },
+  "rewrites": [
+    { "source": "/stats/script.js", "destination": "/api/stats/script" },
+    { "source": "/stats/send", "destination": "/api/stats/send" }
+  ]
 }

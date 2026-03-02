@@ -39,6 +39,10 @@ app.post('/api/interaction', require('./api/interaction'));
 app.post('/api/search', require('./api/search'));
 app.post('/api/auth/merge', require('./api/auth/merge'));
 
+// Analytics proxy (bypasses ad blockers)
+app.get('/stats/script.js', require('./api/stats/script'));
+app.post('/stats/send', require('./api/stats/send'));
+
 app.listen(PORT, () => {
   console.log(`Pick Me Up running at http://localhost:${PORT}`);
 });
