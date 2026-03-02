@@ -56,9 +56,9 @@ module.exports = async function handler(req, res) {
       if (!latest.has(row.book_id)) latest.set(row.book_id, row);
     }
     for (const row of latest.values()) {
-      if (row.interaction_type === 'like' || row.interaction_type === 'save') {
+      if (row.interaction_type === 'like' || row.interaction_type === 'save' || row.interaction_type === 'read') {
         likedBooks.push(`"${row.title}" by ${row.author}`);
-      } else if (row.interaction_type === 'dislike') {
+      } else if (row.interaction_type === 'dislike' || row.interaction_type === 'read-dislike') {
         dislikedBooks.push(`"${row.title}" by ${row.author}`);
       }
     }

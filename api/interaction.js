@@ -1,6 +1,6 @@
 const { getAuthenticatedUser } = require('./_supabase');
 
-const VALID_TYPES = ['click', 'like', 'dislike', 'save'];
+const VALID_TYPES = ['click', 'like', 'dislike', 'save', 'read', 'read-dislike'];
 
 module.exports = async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });

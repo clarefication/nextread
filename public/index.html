@@ -1403,6 +1403,18 @@
     }
     .pref-save-btn:disabled { opacity: .5; cursor: not-allowed; }
 
+    .read-books-list { display: flex; flex-direction: column; gap: 10px; margin-top: 8px; }
+    .read-book-item  { display: flex; align-items: center; gap: 12px; }
+    .read-book-thumb { width: 34px; height: 50px; border-radius: 3px; object-fit: cover;
+                       background: var(--c-card-border); flex-shrink: 0; }
+    .read-book-meta  { display: flex; flex-direction: column; gap: 2px; }
+    .read-book-title { font-size: 0.875rem; color: var(--c-ink); font-weight: 500; }
+    .read-book-author{ font-size: 0.75rem; color: var(--c-ink-mid); }
+    .read-book-badge { margin-left: auto; flex-shrink: 0; width: 14px; height: 14px; }
+    .read-book-badge svg { width: 14px; height: 14px; }
+    .badge-enjoyed   { color: var(--c-sage); }
+    .badge-not-enjoyed { color: var(--c-err); }
+
     /* ─── History view ──────────────────────────────────── */
     .history-list { margin-bottom: 36px; }
 
@@ -1710,6 +1722,16 @@
       color: var(--c-amber);
       border-color: rgba(212, 160, 84, 0.3);
       background: var(--c-amber-faint);
+    }
+    .card-action-btn.active-read {
+      color: var(--c-sage);
+      border-color: rgba(122, 154, 124, 0.3);
+      background: rgba(122, 154, 124, 0.12);
+    }
+    .card-action-btn.active-read-no {
+      color: var(--c-err);
+      border-color: rgba(196, 107, 94, 0.3);
+      background: rgba(196, 107, 94, 0.08);
     }
 
     .card-action-btn svg {
@@ -2669,7 +2691,15 @@
           <div class="pref-save-row">
             <button class="pref-save-btn" id="prefSaveBtn">Save preferences</button>
           </div>
+          <div class="pref-section">
+            <span class="pref-section-label">Books I've Read</span>
+            <div id="readBooksList" class="read-books-list">
+              <p class="pref-empty">Loading…</p>
+            </div>
+          </div>
         `;
+
+        loadReadBooks();
 
         // Wire chip toggles
         container.querySelectorAll('#prefLikes .pref-chip').forEach(chip => {
@@ -2721,6 +2751,42 @@
       } finally {
         btn.disabled = false;
         btn.textContent = 'Save preferences';
+      }
+    }
+
+    async function loadReadBooks() {
+      const el = document.getElementById('readBooksList');
+      if (!el) return;
+      try {
+        const res = await fetch('/api/read-books', { headers: getAuthHeaders() });
+        if (!res.ok) throw new Error();
+        const { books } = await res.json();
+        if (!books.length) {
+          el.innerHTML = '<p class="pref-empty">No books marked as read yet.</p>';
+          return;
+        }
+        el.innerHTML = books.map(b => {
+          const enjoyed = b.interaction_type === 'read';
+          return `
+          <div class="read-book-item">
+            ${b.cover_url
+              ? `<img class="read-book-thumb" src="${b.cover_url}" alt="${b.title} cover" loading="lazy">`
+              : `<div class="read-book-thumb"></div>`}
+            <div class="read-book-meta">
+              <span class="read-book-title">${b.title}</span>
+              <span class="read-book-author">${b.author}</span>
+            </div>
+            <span class="read-book-badge ${enjoyed ? 'badge-enjoyed' : 'badge-not-enjoyed'}" title="${enjoyed ? 'Enjoyed' : 'Did not enjoy'}">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                ${enjoyed
+                  ? '<path d="M14 9V5a3 3 0 00-3-3l-4 9v11h11.28a2 2 0 002-1.7l1.38-9a2 2 0 00-2-2.3H14z"/><path d="M7 22H4a2 2 0 01-2-2v-7a2 2 0 012-2h3"/>'
+                  : '<path d="M10 15v4a3 3 0 003 3l4-9V2H5.72a2 2 0 00-2 1.7l-1.38 9a2 2 0 002 2.3H10z"/><path d="M17 2h2.67A2.31 2.31 0 0122 4v7a2.31 2.31 0 01-2.33 2H17"/>'}
+              </svg>
+            </span>
+          </div>`;
+        }).join('');
+      } catch {
+        el.innerHTML = '<p class="pref-empty">Could not load read books.</p>';
       }
     }
 
@@ -3266,6 +3332,20 @@ vibeTags must be evocative and specific (e.g. "melancholic", "darkly comic", "sl
               </svg>
               Save
             </button>
+            <button class="card-action-btn read-btn" title="I've read this and enjoyed it">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M14 9V5a3 3 0 00-3-3l-4 9v11h11.28a2 2 0 002-1.7l1.38-9a2 2 0 00-2-2.3H14z"/>
+                <path d="M7 22H4a2 2 0 01-2-2v-7a2 2 0 012-2h3"/>
+              </svg>
+              Read it
+            </button>
+            <button class="card-action-btn read-no-btn" title="I've read this but didn't enjoy it">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M10 15v4a3 3 0 003 3l4-9V2H5.72a2 2 0 00-2 1.7l-1.38 9a2 2 0 002 2.3H10z"/>
+                <path d="M17 2h2.67A2.31 2.31 0 0122 4v7a2.31 2.31 0 01-2.33 2H17"/>
+              </svg>
+              Did not enjoy
+            </button>
           </div>
         `;
 
@@ -3301,6 +3381,27 @@ vibeTags must be evocative and specific (e.g. "melancholic", "darkly comic", "sl
             toast('Removed from reading list');
             trackEvent('unsave', { title: b.title });
           }
+        });
+
+        const readBtn = card.querySelector('.read-btn');
+        const readNoBtn = card.querySelector('.read-no-btn');
+
+        readBtn.addEventListener('click', () => {
+          if (readBtn.classList.contains('active-read')) return;
+          readBtn.classList.add('active-read');
+          readNoBtn.classList.remove('active-read-no');
+          recordInteraction(b.title, b.author, 'read', b._coverId);
+          toast('Great taste noted!');
+          trackEvent('read', { title: b.title });
+        });
+
+        readNoBtn.addEventListener('click', () => {
+          if (readNoBtn.classList.contains('active-read-no')) return;
+          readNoBtn.classList.add('active-read-no');
+          readBtn.classList.remove('active-read');
+          recordInteraction(b.title, b.author, 'read-dislike', b._coverId);
+          toast('Got it — we\'ll steer clear of similar books');
+          trackEvent('read-dislike', { title: b.title });
         });
 
         container.appendChild(card);

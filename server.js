@@ -33,6 +33,7 @@ app.post('/api/books-meta', async (req, res) => {
 app.get('/api/config', require('./api/config'));
 app.get('/api/me', require('./api/me'));
 app.get('/api/saved-books', require('./api/saved-books'));
+app.get('/api/read-books', require('./api/read-books'));
 app.get('/api/history', require('./api/history'));
 app.post('/api/preferences', require('./api/preferences'));
 app.post('/api/interaction', require('./api/interaction'));
