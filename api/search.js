@@ -171,8 +171,8 @@ vibeTags must be evocative and specific (e.g. "melancholic", "darkly comic", "sl
     const verified = parsed.books.filter((_, i) => checks[i]);
     const recommendations = verified.length > 0 ? verified : parsed.books;
 
-    // Persist to search_history
-    await supabase.from('search_history').insert({
+    // Persist to search_history (fire-and-forget — don't block the response)
+    supabase.from('search_history').insert({
       user_id: user.id,
       query_text: queryText.trim(),
       filters,

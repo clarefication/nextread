@@ -57,7 +57,7 @@ async function verifyBookExists(title, author) {
   try {
     const q = encodeURIComponent(`${title} ${author}`);
     const data = await timedFetch(
-      `https://openlibrary.org/search.json?q=${q}&limit=5&fields=title,author_name`, 5000
+      `https://openlibrary.org/search.json?q=${q}&limit=5&fields=title,author_name`, 2500
     ).then(r => r.ok ? r.json() : null);
     if (!data?.docs?.length) return false;
     return data.docs.some(d => isConfidentMatch(d, title, author));
