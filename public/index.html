@@ -1703,7 +1703,14 @@
       display: flex;
       align-items: center;
       gap: 8px;
-      flex-wrap: wrap;
+    }
+    .card-read-btns {
+      display: flex;
+      gap: 8px;
+    }
+    @media (max-width: 640px) {
+      .card-actions { justify-content: center; }
+      .card-read-group { flex-direction: column; align-items: center; width: 100%; }
     }
 
     .card-action-btn {
@@ -3411,20 +3418,22 @@ vibeTags must be evocative and specific (e.g. "melancholic", "darkly comic", "sl
             </button>
             <div class="card-read-group">
               <span class="card-read-label">Already read this book?</span>
-              <button class="card-action-btn read-btn" title="I've read this and enjoyed it">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M14 9V5a3 3 0 00-3-3l-4 9v11h11.28a2 2 0 002-1.7l1.38-9a2 2 0 00-2-2.3H14z"/>
-                  <path d="M7 22H4a2 2 0 01-2-2v-7a2 2 0 012-2h3"/>
-                </svg>
-                Yes, loved it
-              </button>
-              <button class="card-action-btn read-no-btn" title="I've read this but didn't enjoy it">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M10 15v4a3 3 0 003 3l4-9V2H5.72a2 2 0 00-2 1.7l-1.38 9a2 2 0 002 2.3H10z"/>
-                  <path d="M17 2h2.67A2.31 2.31 0 0122 4v7a2.31 2.31 0 01-2.33 2H17"/>
-                </svg>
-                Did not enjoy
-              </button>
+              <div class="card-read-btns">
+                <button class="card-action-btn read-btn" title="I've read this and enjoyed it">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M14 9V5a3 3 0 00-3-3l-4 9v11h11.28a2 2 0 002-1.7l1.38-9a2 2 0 00-2-2.3H14z"/>
+                    <path d="M7 22H4a2 2 0 01-2-2v-7a2 2 0 012-2h3"/>
+                  </svg>
+                  Yes, loved it
+                </button>
+                <button class="card-action-btn read-no-btn" title="I've read this but didn't enjoy it">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M10 15v4a3 3 0 003 3l4-9V2H5.72a2 2 0 00-2 1.7l-1.38 9a2 2 0 002 2.3H10z"/>
+                    <path d="M17 2h2.67A2.31 2.31 0 0122 4v7a2.31 2.31 0 01-2.33 2H17"/>
+                  </svg>
+                  Did not enjoy
+                </button>
+              </div>
             </div>
           </div>
         `;
