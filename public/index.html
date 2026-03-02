@@ -1613,11 +1613,30 @@
       overflow: hidden;
       background: #0C0B09;
       pointer-events: none;
+      isolation: isolate;
+      transition: filter 2s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
     .aura-orb {
       position: absolute;
       border-radius: 50%;
+      pointer-events: none;
+    }
+
+    #aura-mood {
+      position: absolute;
+      width: 120vmax;
+      height: 120vmax;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      border-radius: 50%;
+      filter: blur(90px);
+      mix-blend-mode: screen;
+      opacity: 0;
+      background-color: transparent;
+      transition: opacity 2s cubic-bezier(0.4, 0, 0.2, 1),
+                  background-color 2s cubic-bezier(0.4, 0, 0.2, 1);
       pointer-events: none;
     }
 
@@ -1800,6 +1819,7 @@
     <div class="aura-orb orb-6"></div>
     <div class="aura-orb orb-7"></div>
     <div class="aura-orb orb-8"></div>
+    <div id="aura-mood" aria-hidden="true"></div>
   </div>
   <div id="aura-grain" aria-hidden="true"></div>
   <div id="aura-vignette" aria-hidden="true"></div>
@@ -2269,6 +2289,99 @@
       });
     });
 
+    /* ─── Mood-reactive theming ───────────────────────── */
+    const PALETTES = {
+      warm:      { hue:   0, sat: 1.00, accent: '#E07848', accentMid: '#A85A30', glow: null      },
+      dark:      { hue: 240, sat: 1.20, accent: '#8B72BF', accentMid: '#5A4490', glow: '#5040A8' },
+      romantic:  { hue: 320, sat: 1.30, accent: '#C4607A', accentMid: '#8A3A50', glow: '#D04888' },
+      nature:    { hue: 140, sat: 1.20, accent: '#6A9A72', accentMid: '#3D6B42', glow: '#38A858' },
+      thriller:  { hue: 195, sat: 1.20, accent: '#4A8FA8', accentMid: '#2A5F72', glow: '#2878C0' },
+      whimsical: { hue: 275, sat: 1.30, accent: '#9B7BC4', accentMid: '#6A4A90', glow: '#8840D8' },
+      epic:      { hue: 165, sat: 1.20, accent: '#3A9B8A', accentMid: '#1A6B5A', glow: '#18A898' },
+      hopeful:   { hue:  28, sat: 1.20, accent: '#D4A054', accentMid: '#9A6E28', glow: '#D8A028' },
+    };
+
+    const MOOD_KEYWORDS = {
+      dark:      ['dark','haunting','gothic','grief','bleak','brooding','tragic','disturbing','oppressive','heavy','grim','death','horror','sinister','foreboding','melancholy','moody','unsettling','eerie','dread','despair','loss','mourning'],
+      romantic:  ['romance','romantic','love','heartbreak','tender','longing','desire','passionate','sensual','aching','flirty','swoon','longing','yearning','bittersweet','affair','slow burn'],
+      nature:    ['nature','quiet','peaceful','pastoral','forest','calm','slow','gentle','meditative','countryside','stillness','rural','coastal','garden','sea','seasons','weather','solitude','retreat','rural','walking'],
+      thriller:  ['thriller','mystery','suspense','tense','crime','detective','danger','twist','gripping','paranoid','chase','thriller','whodunit','conspiracy','locked room','psychological','noir'],
+      whimsical: ['magic','magical','fantasy','whimsical','fairy','enchanting','mythical','wonder','otherworldly','fable','dreamlike','whimsy','fantastical','spells','wizard','witch','folklore','mythology'],
+      epic:      ['epic','adventure','historical','war','saga','quest','sweeping','vast','grand','journey','pilgrimage','expedition','odyssey','conquest','dynasty','empire'],
+      hopeful:   ['hopeful','uplifting','funny','cozy','heartwarming','feel-good','optimistic','inspiring','joyful','lighthearted','wholesome','cheerful','cheering','charming','sweet','delightful','warm','bright','upbeat','laugh','humour','humor','comic','gentle','life-affirming','spirits','lift','pick me up','comfort','happy','healing'],
+    };
+
+    function detectPalette(text) {
+      if (!text) return 'warm';
+      const lower = text.toLowerCase();
+      const scores = {};
+      for (const [key, words] of Object.entries(MOOD_KEYWORDS)) {
+        scores[key] = words.filter(w => lower.includes(w)).length;
+      }
+      const best = Object.entries(scores).sort((a, b) => b[1] - a[1])[0];
+      return best[1] > 0 ? best[0] : 'warm';
+    }
+
+    function hexToRgb(hex) {
+      const r = parseInt(hex.slice(1,3),16), g = parseInt(hex.slice(3,5),16), b = parseInt(hex.slice(5,7),16);
+      return [r, g, b];
+    }
+    function lerp(a, b, t) { return Math.round(a + (b - a) * t); }
+    function rgbToHex(r, g, b) { return '#' + [r,g,b].map(v => v.toString(16).padStart(2,'0')).join(''); }
+
+    let _themeRaf = null;
+    let _currentAccent = '#E07848';
+    let _currentAccentMid = '#A85A30';
+
+    function applyTheme(paletteKey, intensity = 1.0) {
+      const palette = PALETTES[paletteKey] || PALETTES.warm;
+      const base = PALETTES.warm;
+
+      // Hue-rotate: atmospheric secondary effect
+      const hue = (palette.hue - base.hue) * intensity;
+      const sat = base.sat + (palette.sat - base.sat) * intensity;
+      document.getElementById('aura-root').style.filter = `hue-rotate(${hue}deg) saturate(${sat})`;
+
+      // Mood orb: primary colour identity via screen blend
+      const moodEl = document.getElementById('aura-mood');
+      if (palette.glow) {
+        moodEl.style.backgroundColor = palette.glow;
+        moodEl.style.opacity = String((intensity * 0.65).toFixed(3));
+      } else {
+        moodEl.style.opacity = '0';
+      }
+
+      // Accent: interpolate via rAF
+      const fromAccent = hexToRgb(_currentAccent);
+      const toAccent   = hexToRgb(palette.accent);
+      const fromMid    = hexToRgb(_currentAccentMid);
+      const toMid      = hexToRgb(palette.accentMid);
+      const targetAccent = [lerp(fromAccent[0], toAccent[0], intensity), lerp(fromAccent[1], toAccent[1], intensity), lerp(fromAccent[2], toAccent[2], intensity)];
+      const targetMid    = [lerp(fromMid[0], toMid[0], intensity), lerp(fromMid[1], toMid[1], intensity), lerp(fromMid[2], toMid[2], intensity)];
+
+      if (_themeRaf) cancelAnimationFrame(_themeRaf);
+      const duration = 1500;
+      const start = performance.now();
+      const startAccent = hexToRgb(_currentAccent);
+      const startMid    = hexToRgb(_currentAccentMid);
+
+      function tick(now) {
+        const t = Math.min((now - start) / duration, 1);
+        const e = t < 0.5 ? 2*t*t : -1+(4-2*t)*t; // ease in-out quad
+        const a = [lerp(startAccent[0], targetAccent[0], e), lerp(startAccent[1], targetAccent[1], e), lerp(startAccent[2], targetAccent[2], e)];
+        const m = [lerp(startMid[0], targetMid[0], e), lerp(startMid[1], targetMid[1], e), lerp(startMid[2], targetMid[2], e)];
+        const aHex = rgbToHex(...a), mHex = rgbToHex(...m);
+        const root = document.documentElement;
+        root.style.setProperty('--c-amber', aHex);
+        root.style.setProperty('--c-amber-mid', mHex);
+        root.style.setProperty('--c-amber-faint', `rgba(${a[0]},${a[1]},${a[2]},0.09)`);
+        root.style.setProperty('--c-amber-glow',  `rgba(${a[0]},${a[1]},${a[2]},0.18)`);
+        if (t < 1) _themeRaf = requestAnimationFrame(tick);
+        else { _currentAccent = aHex; _currentAccentMid = mHex; }
+      }
+      _themeRaf = requestAnimationFrame(tick);
+    }
+
     /* ─── Saved Books ──────────────────────────────────── */
     const GENRE_LIST = ['Fiction', 'Non-fiction', 'Literary Fiction', 'Romance', 'Thriller', 'Mystery', 'Fantasy', 'Sci-fi', 'Historical', 'Essay Collection'];
 
@@ -2686,6 +2799,16 @@
       loadLast();
       initSupabase();
 
+      // Mood-reactive theme: debounced on input
+      let _moodDebounce = null;
+      document.getElementById('moodInput').addEventListener('input', () => {
+        clearTimeout(_moodDebounce);
+        _moodDebounce = setTimeout(() => {
+          const val = document.getElementById('moodInput').value;
+          if (val.length > 8) applyTheme(detectPalette(val), 0.35);
+        }, 600);
+      });
+
       // Show welcome popup if not dismissed
       if (!localStorage.getItem('betweenbooks_welcome_dismissed')) {
         document.getElementById('welcomeOverlay').classList.add('show');
@@ -2847,6 +2970,7 @@ vibeTags must be evocative and specific (e.g. "melancholic", "darkly comic", "sl
       }
 
       clearErr();
+      applyTheme('warm', 1.0);
       setLoading(true);
       document.getElementById('results').innerHTML = '';
       trackEvent('search', { query: mood.substring(0, 100) });
@@ -2911,6 +3035,9 @@ vibeTags must be evocative and specific (e.g. "melancholic", "darkly comic", "sl
         const container = document.getElementById('results');
         renderBooks(books, container, q, false, personalized);
         enrichCards(books, container);
+
+        const allVibes = books.flatMap(b => b.vibeTags || []).join(' ');
+        applyTheme(detectPalette(q + ' ' + allVibes), 1.0);
 
         localStorage.setItem('betweenbooks_last', JSON.stringify({ q, books }));
         savePastRecommendations(books);
