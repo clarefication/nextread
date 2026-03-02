@@ -15,6 +15,6 @@
   },
   "rewrites": [
     { "source": "/stats/script.js", "destination": "/api/stats/script" },
-    { "source": "/stats/send", "destination": "/api/stats/send" }
+    { "source": "/stats/api/send", "destination": "/api/stats/send" }
   ]
 }
