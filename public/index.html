@@ -173,9 +173,74 @@
       background: var(--c-amber-faint);
     }
 
+    /* ─── Hamburger menu ────────────────────────────── */
+    .hamburger-btn {
+      display: none;
+      flex-direction: column;
+      justify-content: center;
+      gap: 5px;
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 6px 4px;
+      flex-shrink: 0;
+    }
+    .hamburger-btn span {
+      display: block;
+      width: 20px;
+      height: 1.5px;
+      background: var(--c-ink-soft);
+      border-radius: 2px;
+      transition: all var(--ease);
+      transform-origin: center;
+    }
+    .hamburger-btn.open span:nth-child(1) { transform: translateY(6.5px) rotate(45deg); }
+    .hamburger-btn.open span:nth-child(2) { opacity: 0; transform: scaleX(0); }
+    .hamburger-btn.open span:nth-child(3) { transform: translateY(-6.5px) rotate(-45deg); }
+
+    .mobile-nav {
+      display: none;
+      position: fixed;
+      top: 49px;
+      left: 0; right: 0;
+      z-index: 99;
+      flex-direction: column;
+      background: rgba(10, 8, 6, 0.96);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--c-border);
+      padding: 8px 12px 14px;
+    }
+    .mobile-nav.open { display: flex; }
+    .mobile-nav .nav-link {
+      text-align: left;
+      font-size: 0.95rem;
+      padding: 12px 16px;
+      border-radius: var(--r-sm);
+      width: 100%;
+    }
+
+    .mobile-nav-divider {
+      height: 1px;
+      background: var(--c-border);
+      margin: 8px 16px;
+    }
+    .mobile-nav .mobile-auth-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 16px 4px;
+    }
+    .mobile-nav .mobile-auth-btn {
+      flex-shrink: 0;
+    }
+
     @media (max-width: 640px) {
       .topbar { padding: 10px 16px; }
-      .nav-link { font-size: 0.7rem; padding: 5px 10px; }
+      .topbar-nav { display: none !important; }
+      .topbar-auth { display: none !important; }
+      .hamburger-btn { display: flex !important; }
+      .mobile-nav { top: 49px; }
     }
 
     /* ─── Hero header ───────────────────────────────── */
@@ -1752,7 +1817,25 @@
       <span class="auth-badge" id="authBadge">Guest</span>
       <button class="btn-auth" id="authBtn" onclick="showLoginUI()">Sign in to save &amp; sync</button>
     </div>
+    <button class="hamburger-btn hidden" id="hamburgerBtn" aria-label="Menu" aria-expanded="false">
+      <span></span><span></span><span></span>
+    </button>
   </nav>
+
+  <!-- Mobile nav dropdown -->
+  <div class="mobile-nav" id="mobileNav">
+    <div id="mobileNavLinks" style="display:none">
+      <button class="nav-link active" data-view="home" data-mobile>Search</button>
+      <button class="nav-link" data-view="saved" data-mobile>Reading List</button>
+      <button class="nav-link" data-view="preferences" data-mobile>Preferences</button>
+      <button class="nav-link" data-view="history" data-mobile>History</button>
+      <div class="mobile-nav-divider"></div>
+    </div>
+    <div class="mobile-auth-row">
+      <span class="auth-badge" id="mobileAuthBadge">Guest</span>
+      <button class="btn-auth mobile-auth-btn" id="mobileAuthBtn">Sign in to save &amp; sync</button>
+    </div>
+  </div>
 
   <!-- Login modal -->
   <div class="login-overlay" id="loginOverlay" onclick="if(event.target===this)closeLoginUI()">
@@ -2003,22 +2086,36 @@
       const badge = document.getElementById('authBadge');
       const btn = document.getElementById('authBtn');
       const nav = document.getElementById('topbarNav');
+      const hamburger = document.getElementById('hamburgerBtn');
+      const mobileBadge = document.getElementById('mobileAuthBadge');
+      const mobileBtn = document.getElementById('mobileAuthBtn');
+      const mobileNavLinks = document.getElementById('mobileNavLinks');
       if (!badge || !btn) return;
 
       const isSignedIn = sbSession?.user && !sbSession.user.is_anonymous;
 
       if (isSignedIn) {
-        badge.textContent = sbSession.user.email || 'Signed in';
+        const email = sbSession.user.email || 'Signed in';
+        badge.textContent = email;
         badge.classList.add('signed-in');
         btn.textContent = 'Log out';
         btn.onclick = handleLogout;
+        if (mobileBadge) { mobileBadge.textContent = email; mobileBadge.classList.add('signed-in'); }
+        if (mobileBtn) { mobileBtn.textContent = 'Log out'; mobileBtn.onclick = handleLogout; }
+        if (mobileNavLinks) mobileNavLinks.style.display = '';
         if (nav) nav.classList.remove('hidden');
+        if (hamburger) hamburger.classList.remove('hidden');
       } else {
         badge.textContent = 'Guest';
         badge.classList.remove('signed-in');
         btn.textContent = 'Sign in to save & sync';
         btn.onclick = showLoginUI;
+        if (mobileBadge) { mobileBadge.textContent = 'Guest'; mobileBadge.classList.remove('signed-in'); }
+        if (mobileBtn) { mobileBtn.textContent = 'Sign in to save & sync'; mobileBtn.onclick = showLoginUI; }
+        if (mobileNavLinks) mobileNavLinks.style.display = 'none';
         if (nav) nav.classList.add('hidden');
+        if (hamburger) hamburger.classList.remove('hidden');
+        closeMobileNav();
         // If on a non-home view, go back to home
         if (currentView !== 'home') showView('home');
       }
@@ -2131,6 +2228,39 @@
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
     window.showView = showView;
+
+    // Hamburger menu
+    function closeMobileNav() {
+      const btn = document.getElementById('hamburgerBtn');
+      const menu = document.getElementById('mobileNav');
+      if (!btn || !menu) return;
+      btn.classList.remove('open');
+      btn.setAttribute('aria-expanded', 'false');
+      menu.classList.remove('open');
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const hamburgerBtn = document.getElementById('hamburgerBtn');
+      const mobileNav    = document.getElementById('mobileNav');
+      if (hamburgerBtn && mobileNav) {
+        hamburgerBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const isOpen = mobileNav.classList.toggle('open');
+          hamburgerBtn.classList.toggle('open', isOpen);
+          hamburgerBtn.setAttribute('aria-expanded', isOpen);
+        });
+        document.addEventListener('click', (e) => {
+          if (!mobileNav.contains(e.target) && e.target !== hamburgerBtn) closeMobileNav();
+        });
+        mobileNav.querySelectorAll('.nav-link').forEach(link => {
+          link.addEventListener('click', () => { showView(link.dataset.view); closeMobileNav(); });
+        });
+        const mobileAuthBtn = document.getElementById('mobileAuthBtn');
+        if (mobileAuthBtn) {
+          mobileAuthBtn.addEventListener('click', () => closeMobileNav());
+        }
+      }
+    });
 
     // Wire nav links
     document.addEventListener('DOMContentLoaded', () => {
