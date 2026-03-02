@@ -104,8 +104,9 @@ async function lookupBook(title, author) {
   const empty = { olCover: null, olRating: null, isbn13: null, isbn10: null };
 
   const queries = [
+    `q=${encodeURIComponent(title + ' ' + author)}&limit=5&lang=eng`,
+    `title=${encodeURIComponent(title)}&author=${encodeURIComponent(author)}&limit=5&lang=eng`,
     `q=${encodeURIComponent(title + ' ' + author)}&limit=5`,
-    `title=${encodeURIComponent(title)}&author=${encodeURIComponent(author)}&limit=5`,
   ];
 
   for (const qs of queries) {
