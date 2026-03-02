@@ -1700,6 +1700,11 @@
   <script type="module">
     import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
+    /* ─── Analytics ─────────────────────────────────────── */
+    function trackEvent(name, props) {
+      try { if (window.umami) window.umami.track(name, props); } catch {}
+    }
+
     /* ─── Supabase init ───────────────────────────────── */
     let sb = null;
     let sbSession = null;
@@ -2711,10 +2716,5 @@ vibeTags must be evocative and specific (e.g. "melancholic", "darkly comic", "sl
   </script>
 
   <script defer src="https://cloud.umami.is/script.js" data-website-id="2daa1420-fbe4-4634-8bba-eb7d66619662"></script>
-  <script>
-    function trackEvent(name, props) {
-      if (window.umami) window.umami.track(name, props);
-    }
-  </script>
 </body>
 </html>
