@@ -2512,18 +2512,20 @@
 
     /* ─── Mood-reactive theming ───────────────────────── */
     const PALETTES = {
-      warm:      { hue:   0, sat: 1.00, accent: '#E07848', accentMid: '#A85A30', glow: null      },
-      dark:      { hue: 240, sat: 1.20, accent: '#8B72BF', accentMid: '#5A4490', glow: '#5040A8' },
-      romantic:  { hue: 320, sat: 1.30, accent: '#C4607A', accentMid: '#8A3A50', glow: '#D04888' },
-      nature:    { hue: 140, sat: 1.20, accent: '#6A9A72', accentMid: '#3D6B42', glow: '#38A858' },
-      thriller:  { hue: 195, sat: 1.20, accent: '#4A8FA8', accentMid: '#2A5F72', glow: '#2878C0' },
-      whimsical: { hue: 275, sat: 1.30, accent: '#9B7BC4', accentMid: '#6A4A90', glow: '#8840D8' },
-      epic:      { hue: 165, sat: 1.20, accent: '#3A9B8A', accentMid: '#1A6B5A', glow: '#18A898' },
-      hopeful:   { hue:  28, sat: 1.20, accent: '#D4A054', accentMid: '#9A6E28', glow: '#D8A028' },
+      warm:       { hue:   0, sat: 1.00, accent: '#E07848', accentMid: '#A85A30', glow: null      },
+      dark:       { hue: 240, sat: 1.20, accent: '#8B72BF', accentMid: '#5A4490', glow: '#5040A8' },
+      melancholy: { hue: 210, sat: 0.88, accent: '#5A7A9A', accentMid: '#3A5870', glow: '#2A5070' },
+      romantic:   { hue: 320, sat: 1.30, accent: '#C4607A', accentMid: '#8A3A50', glow: '#D04888' },
+      nature:     { hue: 140, sat: 1.20, accent: '#6A9A72', accentMid: '#3D6B42', glow: '#38A858' },
+      thriller:   { hue: 195, sat: 1.20, accent: '#4A8FA8', accentMid: '#2A5F72', glow: '#2878C0' },
+      whimsical:  { hue: 275, sat: 1.30, accent: '#9B7BC4', accentMid: '#6A4A90', glow: '#8840D8' },
+      epic:       { hue: 165, sat: 1.20, accent: '#3A9B8A', accentMid: '#1A6B5A', glow: '#18A898' },
+      hopeful:    { hue:  28, sat: 1.20, accent: '#D4A054', accentMid: '#9A6E28', glow: '#D8A028' },
     };
 
     const MOOD_KEYWORDS = {
-      dark:      ['dark','haunting','gothic','grief','bleak','brooding','tragic','disturbing','oppressive','heavy','grim','death','horror','sinister','foreboding','melancholy','moody','unsettling','eerie','dread','despair','loss','mourning'],
+      dark:       ['dark','haunting','gothic','brooding','tragic','disturbing','oppressive','grim','death','horror','sinister','foreboding','unsettling','eerie','dread'],
+      melancholy: ['sad','lonely','wistful','reflective','pensive','introspective','grief','bleak','melancholy','moody','despair','loss','mourning','mournful','somber','sombre','subdued','heavy','numb','hollow','distant','nostalgic','nostalgia','bittersweet','isolated','desolate','forlorn','empty','resigned','heavy-hearted','ennui','alienated'],
       romantic:  ['romance','romantic','love','heartbreak','tender','longing','desire','passionate','sensual','aching','flirty','swoon','longing','yearning','bittersweet','affair','slow burn'],
       nature:    ['nature','quiet','peaceful','pastoral','forest','calm','slow','gentle','meditative','countryside','stillness','rural','coastal','garden','sea','seasons','weather','solitude','retreat','rural','walking'],
       thriller:  ['thriller','mystery','suspense','tense','crime','detective','danger','twist','gripping','paranoid','chase','thriller','whodunit','conspiracy','locked room','psychological','noir'],
