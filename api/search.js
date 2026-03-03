@@ -11,7 +11,7 @@ module.exports = async function handler(req, res) {
   if (auth.error) return res.status(401).json({ error: auth.error });
 
   const { supabase, user } = auth;
-  const { queryText, filters = {} } = req.body;
+  const { queryText, filters = {}, searchMyList = false, excludeMyList = false } = req.body;
 
   if (!queryText || typeof queryText !== 'string' || !queryText.trim()) {
     return res.status(400).json({ error: 'queryText is required' });
@@ -22,12 +22,27 @@ module.exports = async function handler(req, res) {
   const apiKey = process.env.ANTHROPIC_API_KEY;
   if (!apiKey) return res.status(500).json({ error: 'ANTHROPIC_API_KEY not configured' });
 
-  // Fetch user preferences and recent search results for personalization
-  const [prefsRes, historyRes, interactionsRes] = await Promise.all([
+  // Fetch user preferences, history, and all interactions (for saved books + taste signals)
+  const [prefsRes, historyRes, allInteractionsRes] = await Promise.all([
     supabase.from('preferences').select('*').eq('user_id', user.id).single(),
     supabase.from('search_history').select('results').eq('user_id', user.id).order('created_at', { ascending: false }).limit(10),
-    supabase.from('book_interactions').select('book_id, title, author, interaction_type').eq('user_id', user.id).order('created_at', { ascending: false }).limit(50),
+    supabase.from('book_interactions')
+      .select('book_id, title, author, interaction_type')
+      .eq('user_id', user.id)
+      .order('created_at', { ascending: false }),
   ]);
+
+  // Dedupe interactions by book_id (latest wins) — mirrors saved-books.js logic
+  const latestByBook = new Map();
+  for (const row of allInteractionsRes.data || []) {
+    if (!latestByBook.has(row.book_id)) latestByBook.set(row.book_id, row);
+  }
+
+  // Build saved books list from latest interactions only
+  const savedRes = { data: [...latestByBook.values()].filter(r => r.interaction_type === 'save') };
+
+  // For taste signals, use same deduped data (replaces interactionsRes)
+  const interactionsRes = { data: [...latestByBook.values()].slice(0, 50) };
 
   const prefs = prefsRes.data;
   const personalized = !!(prefs?.likes_genres?.length || prefs?.dislikes_genres?.length || interactionsRes.data?.length);
@@ -106,6 +121,97 @@ Additional preferences:`;
     }
   }
 
+  // Reading list: either search within it or exclude it
+  const savedBooks = savedRes?.data?.length ? savedRes.data : [];
+
+  if (excludeMyList && savedBooks.length) {
+    const seen = new Set();
+    const savedExclusions = [];
+    for (const b of savedBooks) {
+      const key = `${b.title.toLowerCase()}::${b.author.toLowerCase()}`;
+      if (!seen.has(key)) {
+        seen.add(key);
+        savedExclusions.push(`- "${b.title}" by ${b.author}`);
+      }
+    }
+    prompt += `\n\nDo NOT recommend any of these books (already on the reader's reading list):\n${savedExclusions.join('\n')}`;
+  }
+
+  // ── Branch: reading list search — separate prompt, returns index, we map back ──
+  if (searchMyList && savedBooks.length) {
+    const numberedList = savedBooks.map((b, i) => `${i + 1}. ${b.title} by ${b.author}`).join('\n');
+
+    const listPrompt = `Here is a numbered reading list:
+
+${numberedList}
+
+The reader is in the mood for: "${queryText.trim()}"
+
+Which ONE book from the list above best matches that mood? Reply with ONLY a JSON object like this, nothing else:
+{"pick":1,"summary":"What the book is about in 1-2 sentences.","why":"Why it fits the mood.","vibes":["tag1","tag2","tag3"]}
+
+The "pick" field must be the number from the list. Do not pick a book that is not on the list.`;
+
+    try {
+      const response = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-api-key': apiKey,
+          'anthropic-version': '2023-06-01',
+        },
+        body: JSON.stringify({
+          model: 'claude-sonnet-4-6',
+          max_tokens: 512,
+          messages: [{ role: 'user', content: listPrompt }],
+        }),
+      });
+
+      if (!response.ok) {
+        const err = await response.json().catch(() => ({}));
+        return res.status(response.status).json({ error: err.error?.message || `API error ${response.status}` });
+      }
+
+      const data = await response.json();
+      const text = data.content?.[0]?.text || '';
+      console.log('[searchMyList] raw response:', text);
+
+      const match = text.match(/\{[\s\S]*\}/);
+      if (!match) return res.status(500).json({ error: 'Could not parse response' });
+
+      let parsed;
+      try { parsed = JSON.parse(match[0]); }
+      catch { return res.status(500).json({ error: 'Could not parse response' }); }
+
+      const idx = parsed.pick;
+      if (!Number.isInteger(idx) || idx < 1 || idx > savedBooks.length) {
+        console.log('[searchMyList] invalid pick index:', idx, 'list size:', savedBooks.length);
+        return res.status(500).json({ error: 'Could not match a book from your list. Try a different mood.' });
+      }
+
+      const book = savedBooks[idx - 1];
+      const recommendations = [{
+        title: book.title,
+        author: book.author,
+        summary: parsed.summary || '',
+        whyThisMatchesYou: parsed.why || '',
+        vibeTags: parsed.vibes || [],
+      }];
+
+      supabase.from('search_history').insert({
+        user_id: user.id,
+        query_text: queryText.trim(),
+        filters,
+        results: recommendations,
+      });
+
+      return res.json({ recommendations, personalized });
+    } catch (err) {
+      return res.status(500).json({ error: err.message || 'Something went wrong' });
+    }
+  }
+
+  // ── Normal search flow ──
   prompt += `
 
 RULES (follow every single one exactly):
@@ -114,7 +220,7 @@ RULES (follow every single one exactly):
 3. The "summary" field must be a factually accurate 1\u20132 sentence description of what the book is actually about. Do NOT invent plot details, characters, or settings. Only state facts you are certain of. If unsure of specifics, keep the summary high-level rather than risk inaccuracy.
 4. Do NOT default to the most famous or obvious picks. Think past the first tier of popular recommendations. But never sacrifice accuracy for obscurity \u2014 a well-known book that perfectly fits is better than an obscure one you\u2019re unsure about.
 5. Every recommendation must feel intentional and personal, not algorithmic.
-6. Each book must be a distinct, different recommendation. Never repeat authors across the 3 picks.
+6. Each book must be a distinct, different recommendation. Never repeat authors across picks.
 
 Respond with ONLY a valid JSON object \u2014 no markdown fences, no explanation text, just raw JSON:
 

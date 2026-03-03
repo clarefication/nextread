@@ -1238,11 +1238,20 @@
       gap: 16px;
       margin-bottom: 36px;
     }
-    @media (max-width: 560px) { .saved-grid { grid-template-columns: 1fr; } }
+    @media (max-width: 560px) {
+      .saved-grid { grid-template-columns: 1fr; }
+      .saved-toolbar { flex-wrap: wrap; gap: 8px; }
+      .saved-toolbar-left { flex-wrap: wrap; }
+    }
 
     .saved-card {
-      background: var(--c-bg-card);
-      border: 1px solid var(--c-border);
+      position: relative;
+      overflow: hidden;
+      background: rgba(12, 7, 3, 0.36);
+      backdrop-filter: blur(32px) saturate(1.6) brightness(0.88);
+      -webkit-backdrop-filter: blur(32px) saturate(1.6) brightness(0.88);
+      border: 1px solid rgba(255, 185, 120, 0.07);
+      border-top-color: rgba(255, 200, 150, 0.18);
       border-radius: var(--r);
       padding: 20px;
       display: flex;
@@ -1250,11 +1259,17 @@
       align-items: center;
       text-align: center;
       transition: border-color var(--ease), box-shadow var(--ease);
-      position: relative;
+      box-shadow:
+        inset 0 1px 0 rgba(255, 200, 150, 0.10),
+        inset 0 -1px 0 rgba(0, 0, 0, 0.20),
+        0 6px 24px rgba(0, 0, 0, 0.30);
     }
     .saved-card:hover {
-      border-color: var(--c-border-lt);
-      box-shadow: 0 4px 24px var(--c-shadow);
+      border-color: rgba(255, 200, 150, 0.22);
+      box-shadow:
+        inset 0 1px 0 rgba(255, 200, 150, 0.10),
+        inset 0 -1px 0 rgba(0, 0, 0, 0.20),
+        0 8px 32px rgba(0, 0, 0, 0.4);
     }
 
     .saved-cover {
@@ -1352,6 +1367,385 @@
     }
 
     .saved-remove:hover { color: var(--c-err); }
+
+    /* ─── Bulk manage toolbar ─────────────────────────── */
+    .saved-toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+    .saved-toolbar-left {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .manage-btn {
+      font-family: var(--f-body);
+      font-size: 0.62rem;
+      font-weight: 400;
+      letter-spacing: 0.03em;
+      color: var(--c-ink-soft);
+      background: none;
+      border: 1px solid var(--c-border);
+      border-radius: 100px;
+      padding: 5px 14px;
+      cursor: pointer;
+      transition: all var(--ease);
+      white-space: nowrap;
+    }
+    .manage-btn:hover {
+      color: var(--c-ink);
+      border-color: var(--c-border-lt);
+    }
+    .manage-btn.active {
+      color: var(--c-amber);
+      border-color: var(--c-amber-mid);
+      background: var(--c-amber-faint);
+    }
+
+    .bulk-actions {
+      display: none;
+      align-items: center;
+      gap: 8px;
+    }
+    .bulk-actions.visible { display: flex; }
+
+    .bulk-btn {
+      font-family: var(--f-body);
+      font-size: 0.62rem;
+      font-weight: 400;
+      letter-spacing: 0.03em;
+      color: var(--c-ink-soft);
+      background: none;
+      border: 1px solid var(--c-border);
+      border-radius: 100px;
+      padding: 5px 14px;
+      cursor: pointer;
+      transition: all var(--ease);
+      white-space: nowrap;
+    }
+    .bulk-btn:hover {
+      color: var(--c-ink);
+      border-color: var(--c-border-lt);
+    }
+    .bulk-btn.danger {
+      color: var(--c-err);
+      border-color: var(--c-err);
+      background: var(--c-err-bg);
+    }
+    .bulk-btn.danger:hover {
+      background: rgba(196, 107, 94, 0.18);
+    }
+    .bulk-btn:disabled {
+      opacity: 0.4;
+      cursor: default;
+    }
+
+    .bulk-count {
+      font-size: 0.72rem;
+      font-weight: 300;
+      color: var(--c-ink-mid);
+      white-space: nowrap;
+    }
+
+    /* ─── Sort & view controls ────────────────────────── */
+    .saved-toolbar-right {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .sort-btn, .view-toggle-btn {
+      font-family: var(--f-body);
+      font-size: 0.62rem;
+      font-weight: 400;
+      letter-spacing: 0.03em;
+      color: var(--c-ink-soft);
+      background: none;
+      border: 1px solid var(--c-border);
+      border-radius: 100px;
+      padding: 5px 12px;
+      cursor: pointer;
+      transition: all var(--ease);
+      white-space: nowrap;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .sort-btn:hover, .view-toggle-btn:hover {
+      color: var(--c-ink);
+      border-color: var(--c-border-lt);
+    }
+    .sort-btn.active, .view-toggle-btn.active {
+      color: var(--c-amber);
+      border-color: var(--c-amber-mid);
+      background: var(--c-amber-faint);
+    }
+    .sort-btn svg, .view-toggle-btn svg {
+      flex-shrink: 0;
+    }
+
+    /* ─── List view ───────────────────────────────────── */
+    .saved-grid.list-view {
+      grid-template-columns: 1fr;
+      gap: 0;
+    }
+    .saved-grid.list-view .saved-card {
+      flex-direction: row;
+      align-items: center;
+      text-align: left;
+      padding: 14px 20px;
+      border-radius: 0;
+      border-bottom: none;
+    }
+    .saved-grid.list-view .saved-card:first-child {
+      border-radius: var(--r) var(--r) 0 0;
+    }
+    .saved-grid.list-view .saved-card:last-child {
+      border-radius: 0 0 var(--r) var(--r);
+      border-bottom: 1px solid var(--c-border);
+    }
+    .saved-grid.list-view .saved-card:only-child {
+      border-radius: var(--r);
+      border-bottom: 1px solid var(--c-border);
+    }
+    .saved-grid.list-view .saved-cover,
+    .saved-grid.list-view .saved-cover-placeholder {
+      width: 40px;
+      height: 60px;
+      margin-bottom: 0;
+      margin-right: 16px;
+      flex-shrink: 0;
+    }
+    .saved-grid.list-view .saved-info {
+      flex: 1;
+      min-width: 0;
+    }
+    .saved-grid.list-view .saved-title {
+      font-size: 0.88rem;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .saved-grid.list-view .saved-author {
+      margin-bottom: 4px;
+    }
+    .saved-grid.list-view .saved-links {
+      justify-content: flex-start;
+    }
+    .saved-grid.list-view .saved-remove {
+      position: static;
+      flex-shrink: 0;
+      margin-left: 8px;
+    }
+    .saved-grid.list-view .saved-check {
+      position: static;
+      margin-right: 12px;
+      flex-shrink: 0;
+    }
+    .saved-grid.list-view.selecting .saved-check { display: flex; }
+
+    /* Checkbox on saved cards */
+    .saved-card .saved-check {
+      display: none;
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      width: 20px;
+      height: 20px;
+      border: 1.5px solid var(--c-border-lt);
+      border-radius: 5px;
+      background: var(--c-bg-input);
+      cursor: pointer;
+      transition: all var(--ease);
+      align-items: center;
+      justify-content: center;
+      z-index: 2;
+    }
+    .saved-card .saved-check svg {
+      opacity: 0;
+      transition: opacity var(--ease);
+    }
+    .saved-card .saved-check.checked {
+      background: var(--c-amber);
+      border-color: var(--c-amber);
+    }
+    .saved-card .saved-check.checked svg { opacity: 1; }
+    .saved-grid.selecting .saved-card .saved-check { display: flex; }
+    .saved-grid.selecting .saved-card .saved-remove { display: none; }
+    .saved-grid.selecting .saved-card { cursor: pointer; }
+    .saved-grid.selecting .saved-card.selected {
+      border-color: var(--c-amber-mid);
+      box-shadow: 0 0 0 1px var(--c-amber-mid);
+    }
+
+    /* ─── Import from Goodreads ───────────────────────── */
+    .import-btn {
+      font-family: var(--f-body);
+      font-size: 0.62rem;
+      font-weight: 400;
+      letter-spacing: 0.03em;
+      color: var(--c-ink-soft);
+      background: none;
+      border: 1px solid var(--c-border);
+      border-radius: 100px;
+      padding: 5px 14px;
+      cursor: pointer;
+      transition: all var(--ease);
+      white-space: nowrap;
+    }
+    .import-btn:hover {
+      color: var(--c-amber);
+      border-color: var(--c-amber-mid);
+      background: var(--c-amber-faint);
+    }
+
+    .import-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.6);
+      backdrop-filter: blur(4px);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+    .import-overlay.show { display: flex; }
+
+    .import-card {
+      background: var(--c-bg-card);
+      border: 1px solid var(--c-border);
+      border-radius: var(--r);
+      padding: 40px 36px 36px;
+      max-width: 460px;
+      width: 100%;
+      position: relative;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+    }
+
+    .import-card .login-close {
+      position: absolute;
+      top: 16px;
+      right: 20px;
+    }
+
+    .import-card h2 {
+      font-family: var(--f-display);
+      font-size: 1.6rem;
+      font-weight: 400;
+      color: var(--c-ink);
+      margin-bottom: 10px;
+    }
+
+    .import-card p {
+      font-size: 0.85rem;
+      font-weight: 300;
+      color: var(--c-ink-mid);
+      line-height: 1.5;
+      margin-bottom: 16px;
+    }
+    .import-card p a {
+      color: var(--c-amber);
+      text-decoration: none;
+    }
+    .import-card p a:hover { text-decoration: underline; }
+
+    .import-file-label {
+      display: block;
+      font-family: var(--f-body);
+      font-size: 0.85rem;
+      font-weight: 300;
+      color: var(--c-ink-soft);
+      background: var(--c-bg-input);
+      border: 1px dashed var(--c-border);
+      border-radius: var(--r-sm);
+      padding: 24px 16px;
+      text-align: center;
+      cursor: pointer;
+      transition: all var(--ease);
+      margin-bottom: 16px;
+    }
+    .import-file-label:hover {
+      border-color: var(--c-amber-mid);
+      color: var(--c-ink);
+    }
+    .import-file-label input { display: none; }
+
+    .import-preview {
+      font-size: 0.85rem;
+      font-weight: 400;
+      color: var(--c-sage);
+      text-align: center;
+      margin-bottom: 16px;
+      min-height: 1.4em;
+    }
+
+    .import-actions {
+      display: flex;
+      gap: 12px;
+    }
+    .import-actions .btn-primary {
+      flex: 1;
+    }
+    .import-actions .btn-ghost {
+      flex: 0 0 auto;
+    }
+
+    .import-progress {
+      font-size: 0.8rem;
+      font-weight: 300;
+      color: var(--c-ink-mid);
+      text-align: center;
+      margin-top: 12px;
+      min-height: 1.4em;
+    }
+
+    /* ─── Search list checkboxes ─────────────────────── */
+    .search-list-options {
+      display: none;
+      flex-direction: column;
+      gap: 8px;
+      margin-top: 8px;
+      padding: 10px 0;
+    }
+    .search-list-options.visible { display: flex; }
+
+    .search-list-check {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 0.78rem;
+      font-weight: 300;
+      color: var(--c-ink-soft);
+      cursor: pointer;
+      transition: color var(--ease);
+    }
+    .search-list-check:hover { color: var(--c-ink); }
+    .search-list-check input { display: none; }
+
+    .check-box {
+      width: 18px;
+      height: 18px;
+      border: 1.5px solid var(--c-border-lt);
+      border-radius: 4px;
+      background: var(--c-bg-input);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      transition: all var(--ease);
+    }
+    .check-box svg { opacity: 0; transition: opacity var(--ease); }
+    .search-list-check input:checked ~ .check-box {
+      background: var(--c-amber);
+      border-color: var(--c-amber);
+    }
+    .search-list-check input:checked ~ .check-box svg { opacity: 1; color: var(--c-bg); }
+    .search-list-check:has(input:checked) { color: var(--c-ink); }
 
     /* ─── Preferences view ─────────────────────────────── */
     .pref-section {
@@ -2093,6 +2487,36 @@
     </div>
   </div>
 
+  <!-- Import from Goodreads modal -->
+  <div class="import-overlay" id="importOverlay" onclick="if(event.target===this)closeImport()">
+    <div class="import-card">
+      <button class="login-close" onclick="closeImport()">&times;</button>
+      <h2>Import from Goodreads</h2>
+      <p>Export your Goodreads library at <a href="https://www.goodreads.com/review/import" target="_blank" rel="noopener noreferrer">goodreads.com/review/import</a>, then upload the CSV here. We'll add your "To Read" books to your reading list.</p>
+      <label class="import-file-label" id="importFileLabel">
+        <span id="importFileName">Choose CSV file...</span>
+        <input type="file" id="importFileInput" accept=".csv">
+      </label>
+      <div class="import-preview" id="importPreview"></div>
+      <div class="import-actions" id="importActions" style="display:none">
+        <button class="btn-primary" id="importConfirmBtn" onclick="confirmImport()">Import books</button>
+        <button class="btn-ghost" onclick="closeImport()">Cancel</button>
+      </div>
+      <div class="import-progress" id="importProgress"></div>
+    </div>
+  </div>
+
+  <!-- Import success dialog -->
+  <div class="import-overlay" id="importSuccessOverlay" onclick="if(event.target===this)closeImportSuccess()">
+    <div class="import-card" style="text-align:center">
+      <button class="login-close" onclick="closeImportSuccess()">&times;</button>
+      <h2 style="margin-bottom:12px">Import complete</h2>
+      <p id="importSuccessMsg" style="margin-bottom:8px"></p>
+      <p style="font-size:.88rem;opacity:.65;margin-bottom:24px">Book covers may take a little while to fully load — they'll appear as your list refreshes.</p>
+      <button class="btn-primary" onclick="closeImportSuccess()">Got it</button>
+    </div>
+  </div>
+
   <!-- Welcome popup -->
   <div class="welcome-overlay" id="welcomeOverlay" onclick="if(event.target===this)dismissWelcome()">
     <div class="welcome-card">
@@ -2191,6 +2615,19 @@
         </div>
       </div>
 
+      <div class="search-list-options" id="searchListOptions">
+        <label class="search-list-check">
+          <input type="checkbox" id="searchMyListCheck">
+          <span class="check-box"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>
+          Search my reading list only
+        </label>
+        <label class="search-list-check">
+          <input type="checkbox" id="excludeMyListCheck">
+          <span class="check-box"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>
+          Exclude books from my reading list
+        </label>
+      </div>
+
       <div class="actions">
         <button class="btn-primary" id="findBtn" onclick="findBooks()">
           Take me somewhere new
@@ -2233,6 +2670,7 @@
       <div class="view-header">
         <h2>Reading List</h2>
         <p>Books you've saved to read later</p>
+        <button class="import-btn" id="importGoodreadsBtn" onclick="openImport()" style="margin-top:14px;display:none">Import from Goodreads</button>
       </div>
       <div id="savedContent"></div>
     </div>
@@ -2347,6 +2785,8 @@
         if (mobileNavLinks) mobileNavLinks.style.display = '';
         if (nav) nav.classList.remove('hidden');
         if (hamburger) hamburger.classList.remove('hidden');
+        updateImportBtnVisibility();
+        checkSavedBooksForToggle();
       } else {
         badge.textContent = 'Guest';
         badge.classList.remove('signed-in');
@@ -2358,6 +2798,8 @@
         if (nav) nav.classList.add('hidden');
         if (hamburger) hamburger.classList.remove('hidden');
         closeMobileNav();
+        updateImportBtnVisibility();
+        document.getElementById('searchListOptions').classList.remove('visible');
         // If on a non-home view, go back to home
         if (currentView !== 'home') showView('home');
       }
@@ -2636,12 +3078,36 @@
           return;
         }
 
+        // Toolbar for bulk manage
+        const toolbar = document.createElement('div');
+        toolbar.className = 'saved-toolbar';
+        toolbar.innerHTML = `
+          <div class="saved-toolbar-left">
+            <button class="manage-btn" id="manageSavedBtn">Manage list</button>
+            <div class="bulk-actions" id="bulkActions">
+              <button class="bulk-btn" id="bulkSelectAll">Select all</button>
+              <span class="bulk-count" id="bulkCount"></span>
+              <button class="bulk-btn danger" id="bulkRemove" disabled>Remove selected</button>
+            </div>
+          </div>
+          <div class="saved-toolbar-right">
+            <button class="sort-btn" id="sortSavedBtn" title="Sort">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M3 12h12"/><path d="M3 18h6"/></svg>
+              <span id="sortLabel">Recent</span>
+            </button>
+            <button class="view-toggle-btn" id="viewToggleBtn" title="Switch view">
+              <svg id="viewToggleIcon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+            </button>
+          </div>
+        `;
+
         const grid = document.createElement('div');
         grid.className = 'saved-grid';
 
-        books.forEach(b => {
+        books.forEach((b, idx) => {
           const card = document.createElement('div');
           card.className = 'saved-card';
+          card.dataset.idx = idx;
           const coverHtml = b.cover_url
             ? `<img class="saved-cover" src="${esc(b.cover_url)}" alt="">`
             : `<div class="saved-cover-placeholder"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--c-ink-faint)" stroke-width="1.3"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg></div>`;
@@ -2650,6 +3116,9 @@
           const amzSearch = `https://www.amazon.com/s?k=${encodeURIComponent(b.title + ' ' + b.author)}&i=stripbooks&tag=nextreadapp-22`;
 
           card.innerHTML = `
+            <div class="saved-check">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#0C0B09" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+            </div>
             ${coverHtml}
             <div class="saved-info">
               <div class="saved-title">${esc(b.title)}</div>
@@ -2673,11 +3142,162 @@
             toast('Removed from saved');
           });
 
+          // Toggle selection in manage mode
+          card.addEventListener('click', (e) => {
+            if (!grid.classList.contains('selecting')) return;
+            if (e.target.closest('.saved-link')) return; // don't toggle on link clicks
+            const check = card.querySelector('.saved-check');
+            check.classList.toggle('checked');
+            card.classList.toggle('selected');
+            updateBulkCount(grid);
+          });
+
           grid.appendChild(card);
         });
 
         container.innerHTML = '';
+        container.appendChild(toolbar);
         container.appendChild(grid);
+
+        // Wire up manage mode
+        const manageBtn = toolbar.querySelector('#manageSavedBtn');
+        const bulkActions = toolbar.querySelector('#bulkActions');
+        const bulkSelectAll = toolbar.querySelector('#bulkSelectAll');
+        const bulkRemove = toolbar.querySelector('#bulkRemove');
+        const bulkCount = toolbar.querySelector('#bulkCount');
+
+        manageBtn.addEventListener('click', () => {
+          const entering = !grid.classList.contains('selecting');
+          grid.classList.toggle('selecting', entering);
+          manageBtn.classList.toggle('active', entering);
+          manageBtn.textContent = entering ? 'Done' : 'Manage list';
+          bulkActions.classList.toggle('visible', entering);
+          if (!entering) {
+            // Exit: clear all selections
+            grid.querySelectorAll('.saved-card.selected').forEach(c => {
+              c.classList.remove('selected');
+              c.querySelector('.saved-check').classList.remove('checked');
+            });
+            updateBulkCount(grid);
+          }
+        });
+
+        bulkSelectAll.addEventListener('click', () => {
+          const cards = grid.querySelectorAll('.saved-card');
+          const allSelected = grid.querySelectorAll('.saved-card.selected').length === cards.length;
+          cards.forEach(c => {
+            c.classList.toggle('selected', !allSelected);
+            c.querySelector('.saved-check').classList.toggle('checked', !allSelected);
+          });
+          bulkSelectAll.textContent = allSelected ? 'Select all' : 'Deselect all';
+          updateBulkCount(grid);
+        });
+
+        bulkRemove.addEventListener('click', async () => {
+          const selected = grid.querySelectorAll('.saved-card.selected');
+          if (!selected.length) return;
+          const count = selected.length;
+          bulkRemove.disabled = true;
+          bulkRemove.textContent = `Removing ${count}...`;
+
+          // Batch remove in chunks of 5
+          const items = [...selected].map(c => {
+            const idx = parseInt(c.dataset.idx);
+            return { card: c, book: books[idx] };
+          });
+
+          for (let i = 0; i < items.length; i += 5) {
+            const chunk = items.slice(i, i + 5);
+            await Promise.all(chunk.map(({ book }) =>
+              recordInteraction(book.title, book.author, 'dislike', book.cover_url)
+            ));
+          }
+
+          // Animate out
+          selected.forEach(c => {
+            c.style.opacity = '0';
+            c.style.transform = 'scale(0.95)';
+            c.style.transition = 'all 0.25s ease';
+          });
+          setTimeout(() => {
+            selected.forEach(c => c.remove());
+            if (!grid.children.length) {
+              loadSavedBooks();
+            } else {
+              updateBulkCount(grid);
+              bulkRemove.textContent = 'Remove selected';
+              bulkSelectAll.textContent = 'Select all';
+            }
+          }, 280);
+          toast(`Removed ${count} book${count === 1 ? '' : 's'}`);
+          checkSavedBooksForToggle();
+        });
+
+        function updateBulkCount(g) {
+          const n = g.querySelectorAll('.saved-card.selected').length;
+          const total = g.querySelectorAll('.saved-card').length;
+          bulkCount.textContent = n ? `${n} of ${total} selected` : '';
+          bulkRemove.disabled = !n;
+          bulkSelectAll.textContent = (n === total && n > 0) ? 'Deselect all' : 'Select all';
+        }
+
+        // Sort controls
+        const sortBtn = toolbar.querySelector('#sortSavedBtn');
+        const sortLabel = toolbar.querySelector('#sortLabel');
+        const sortModes = ['recent', 'title', 'author'];
+        const sortLabels = { recent: 'Recent', title: 'Title A\u2013Z', author: 'Author A\u2013Z' };
+        let currentSort = localStorage.getItem('betweenbooks_sort') || 'recent';
+        sortLabel.textContent = sortLabels[currentSort];
+
+        function sortGrid() {
+          const cards = [...grid.querySelectorAll('.saved-card')];
+          cards.sort((a, b) => {
+            if (currentSort === 'title') {
+              return a.querySelector('.saved-title').textContent.localeCompare(b.querySelector('.saved-title').textContent);
+            } else if (currentSort === 'author') {
+              const authA = a.querySelector('.saved-author').textContent.replace(/^by\s+/i, '');
+              const authB = b.querySelector('.saved-author').textContent.replace(/^by\s+/i, '');
+              return authA.localeCompare(authB);
+            }
+            // 'recent' — use original data-idx (insertion order)
+            return parseInt(a.dataset.idx) - parseInt(b.dataset.idx);
+          });
+          cards.forEach(c => grid.appendChild(c));
+        }
+
+        // Apply initial sort if not recent
+        if (currentSort !== 'recent') sortGrid();
+
+        sortBtn.addEventListener('click', () => {
+          const next = sortModes[(sortModes.indexOf(currentSort) + 1) % sortModes.length];
+          currentSort = next;
+          sortLabel.textContent = sortLabels[next];
+          localStorage.setItem('betweenbooks_sort', next);
+          sortGrid();
+        });
+
+        // View toggle (card / list)
+        const viewToggleBtn = toolbar.querySelector('#viewToggleBtn');
+        const viewToggleIcon = toolbar.querySelector('#viewToggleIcon');
+        let listMode = localStorage.getItem('betweenbooks_listview') === '1';
+
+        function applyViewMode() {
+          grid.classList.toggle('list-view', listMode);
+          viewToggleBtn.classList.toggle('active', listMode);
+          viewToggleBtn.title = listMode ? 'Card view' : 'List view';
+          // Swap icon: list icon when in card mode, grid icon when in list mode
+          viewToggleIcon.innerHTML = listMode
+            ? '<rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/>'
+            : '<line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/>';
+        }
+
+        applyViewMode();
+
+        viewToggleBtn.addEventListener('click', () => {
+          listMode = !listMode;
+          localStorage.setItem('betweenbooks_listview', listMode ? '1' : '0');
+          applyViewMode();
+        });
 
         // Enrich covers
         enrichSavedCovers(books, grid);
@@ -2686,40 +3306,264 @@
       }
     }
 
-    async function enrichSavedCovers(books, grid) {
-      try {
-        const res = await fetch('/api/books-meta', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ books: books.map(b => ({ title: b.title, author: b.author })) }),
-        });
-        if (!res.ok) return;
-        const { results } = await res.json();
-        const cards = grid.querySelectorAll('.saved-card');
-        results.forEach((data, i) => {
-          if (!cards[i]) return;
-          if (data.olCover) {
-            const placeholder = cards[i].querySelector('.saved-cover-placeholder');
-            if (placeholder) {
-              const img = document.createElement('img');
-              img.className = 'saved-cover';
-              img.src = data.olCover;
-              img.onload = () => placeholder.replaceWith(img);
-            }
-          }
-          const isbn = data.isbn13 || data.isbn10;
-          if (isbn) {
-            const amzLink = cards[i].querySelector('.amazon-link');
-            if (amzLink) amzLink.href = `https://www.amazon.com/dp/${data.isbn10 || data.isbn13}?tag=nextreadapp-22`;
-            const grIsbn = data.isbn13 || data.isbn10;
-            if (grIsbn) {
-              const grLink = cards[i].querySelector('.goodreads-link');
-              if (grLink) grLink.href = `https://www.goodreads.com/search?q=${grIsbn}&search_type=books&search[field]=on`;
-            }
-          }
-        });
-      } catch { /* non-fatal */ }
+    function _coverCacheKey(title, author) {
+      return `${title}::${author}`.toLowerCase().replace(/[^a-z0-9:]/g, '');
     }
+
+    function _getCoverCache() {
+      try { return JSON.parse(localStorage.getItem('betweenbooks_covers') || '{}'); }
+      catch { return {}; }
+    }
+
+    function _setCoverCache(cache) {
+      try { localStorage.setItem('betweenbooks_covers', JSON.stringify(cache)); }
+      catch { /* quota exceeded — non-fatal */ }
+    }
+
+    function _applyMeta(card, data) {
+      if (data.olCover) {
+        const placeholder = card.querySelector('.saved-cover-placeholder');
+        if (placeholder) {
+          const img = document.createElement('img');
+          img.className = 'saved-cover';
+          img.src = data.olCover;
+          img.onload = () => placeholder.replaceWith(img);
+        }
+      }
+      const isbn = data.isbn13 || data.isbn10;
+      if (isbn) {
+        const amzLink = card.querySelector('.amazon-link');
+        if (amzLink) amzLink.href = `https://www.amazon.com/dp/${data.isbn10 || data.isbn13}?tag=nextreadapp-22`;
+        const grIsbn = data.isbn13 || data.isbn10;
+        if (grIsbn) {
+          const grLink = card.querySelector('.goodreads-link');
+          if (grLink) grLink.href = `https://www.goodreads.com/search?q=${grIsbn}&search_type=books&search[field]=on`;
+        }
+      }
+    }
+
+    async function enrichSavedCovers(books, grid) {
+      // Build a map from data-idx to card element (sort-order safe)
+      const cardByIdx = {};
+      grid.querySelectorAll('.saved-card').forEach(c => { cardByIdx[c.dataset.idx] = c; });
+      const cache = _getCoverCache();
+
+      // Phase 1: instantly apply cached data
+      const uncached = [];
+      books.forEach((b, i) => {
+        const card = cardByIdx[i];
+        if (!card) return;
+        const key = _coverCacheKey(b.title, b.author);
+        if (cache[key]) {
+          _applyMeta(card, cache[key]);
+        } else {
+          uncached.push({ book: b, index: i });
+        }
+      });
+
+      if (!uncached.length) return;
+
+      // Phase 2: fetch uncached in batches of 6, progressively
+      const BATCH = 6;
+      for (let i = 0; i < uncached.length; i += BATCH) {
+        const batch = uncached.slice(i, i + BATCH);
+        try {
+          const res = await fetch('/api/books-meta', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ books: batch.map(u => ({ title: u.book.title, author: u.book.author })) }),
+          });
+          if (!res.ok) continue;
+          const { results } = await res.json();
+          results.forEach((data, j) => {
+            const { book, index } = batch[j];
+            const card = cardByIdx[index];
+            if (!card) return;
+            _applyMeta(card, data);
+            cache[_coverCacheKey(book.title, book.author)] = data;
+          });
+          _setCoverCache(cache);
+        } catch { /* non-fatal, continue with next batch */ }
+      }
+    }
+
+    /* ─── Goodreads CSV Import ─────────────────────────── */
+    let _importedBooks = [];
+
+    function openImport() {
+      if (!sbSession?.user || sbSession.user.is_anonymous) {
+        toast('Sign in to import books');
+        showLoginUI();
+        return;
+      }
+      _importedBooks = [];
+      document.getElementById('importFileInput').value = '';
+      document.getElementById('importFileName').textContent = 'Choose CSV file...';
+      document.getElementById('importPreview').textContent = '';
+      document.getElementById('importActions').style.display = 'none';
+      document.getElementById('importProgress').textContent = '';
+      document.getElementById('importConfirmBtn').disabled = false;
+      document.getElementById('importOverlay').classList.add('show');
+      trackEvent('import_open');
+    }
+    window.openImport = openImport;
+
+    function closeImport() {
+      document.getElementById('importOverlay').classList.remove('show');
+      _importedBooks = [];
+    }
+
+    function closeImportSuccess() {
+      document.getElementById('importSuccessOverlay').classList.remove('show');
+    }
+    window.closeImport = closeImport;
+
+    function parseGoodreadsCsv(text) {
+      const rows = [];
+      let current = '';
+      let inQuotes = false;
+      for (let i = 0; i < text.length; i++) {
+        const ch = text[i];
+        if (ch === '"') {
+          if (inQuotes && text[i + 1] === '"') { current += '"'; i++; }
+          else inQuotes = !inQuotes;
+        } else if (ch === ',' && !inQuotes) {
+          rows.length === 0 ? rows.push([current]) : rows[rows.length - 1].push(current);
+          current = '';
+        } else if ((ch === '\n' || ch === '\r') && !inQuotes) {
+          if (current || (rows.length && rows[rows.length - 1].length)) {
+            if (rows.length === 0) rows.push([current]);
+            else rows[rows.length - 1].push(current);
+          }
+          current = '';
+          if (ch === '\r' && text[i + 1] === '\n') i++;
+          rows.push([]);
+        } else {
+          current += ch;
+        }
+      }
+      if (current) {
+        if (!rows.length) rows.push([]);
+        rows[rows.length - 1].push(current);
+      }
+      // Remove trailing empty row
+      if (rows.length && rows[rows.length - 1].length === 0) rows.pop();
+
+      if (rows.length < 2) return [];
+
+      const headers = rows[0].map(h => h.trim());
+      const titleIdx = headers.indexOf('Title');
+      const authorIdx = headers.indexOf('Author');
+      const shelfIdx = headers.indexOf('Exclusive Shelf');
+
+      if (titleIdx === -1 || authorIdx === -1 || shelfIdx === -1) return [];
+
+      const books = [];
+      for (let r = 1; r < rows.length; r++) {
+        const row = rows[r];
+        if (!row || row.length <= Math.max(titleIdx, authorIdx, shelfIdx)) continue;
+        const shelf = row[shelfIdx].trim();
+        if (shelf === 'to-read') {
+          const title = row[titleIdx].trim();
+          const author = row[authorIdx].trim();
+          if (title && author) books.push({ title, author });
+        }
+      }
+      return books;
+    }
+
+    document.getElementById('importFileInput').addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      document.getElementById('importFileName').textContent = file.name;
+      const reader = new FileReader();
+      reader.onload = (ev) => {
+        _importedBooks = parseGoodreadsCsv(ev.target.result);
+        if (_importedBooks.length) {
+          document.getElementById('importPreview').textContent = `Found ${_importedBooks.length} book${_importedBooks.length === 1 ? '' : 's'} on your To Read shelf`;
+          document.getElementById('importActions').style.display = 'flex';
+        } else {
+          document.getElementById('importPreview').textContent = 'No "To Read" books found in this file. Make sure you exported from Goodreads.';
+          document.getElementById('importActions').style.display = 'none';
+        }
+      };
+      reader.readAsText(file);
+    });
+
+    async function confirmImport() {
+      if (!_importedBooks.length) return;
+
+      // Load existing saved books to skip duplicates
+      let existing = new Set();
+      try {
+        const res = await fetch('/api/saved-books', { headers: getAuthHeaders() });
+        if (res.ok) {
+          const { books } = await res.json();
+          books.forEach(b => existing.add(`${b.title.toLowerCase()}::${b.author.toLowerCase()}`));
+        }
+      } catch {}
+
+      const toImport = _importedBooks.filter(b =>
+        !existing.has(`${b.title.toLowerCase()}::${b.author.toLowerCase()}`)
+      );
+
+      if (!toImport.length) {
+        document.getElementById('importProgress').textContent = 'All books are already in your reading list!';
+        return;
+      }
+
+      document.getElementById('importConfirmBtn').disabled = true;
+      const progress = document.getElementById('importProgress');
+      let imported = 0;
+
+      // Batch in chunks of 5
+      for (let i = 0; i < toImport.length; i += 5) {
+        const chunk = toImport.slice(i, i + 5);
+        await Promise.all(chunk.map(b => recordInteraction(b.title, b.author, 'save', null)));
+        imported += chunk.length;
+        progress.textContent = `Importing ${imported} of ${toImport.length}...`;
+      }
+
+      const skipped = _importedBooks.length - toImport.length;
+      closeImport();
+
+      // Show success dialog
+      const countMsg = `${toImport.length} book${toImport.length === 1 ? '' : 's'} imported${skipped ? ` (${skipped} already saved)` : ''}!`;
+      document.getElementById('importSuccessMsg').textContent = countMsg;
+      document.getElementById('importSuccessOverlay').classList.add('show');
+      trackEvent('import_complete', { count: toImport.length, skipped });
+
+      // Refresh saved books & update toggle visibility
+      loadSavedBooks();
+      checkSavedBooksForToggle();
+    }
+    window.confirmImport = confirmImport;
+
+    // Show import button for signed-in users
+    function updateImportBtnVisibility() {
+      const btn = document.getElementById('importGoodreadsBtn');
+      if (btn) btn.style.display = (sbSession?.user && !sbSession.user.is_anonymous) ? 'inline-block' : 'none';
+    }
+
+    /* ─── Search list checkbox visibility ─────────────── */
+    async function checkSavedBooksForToggle() {
+      const el = document.getElementById('searchListOptions');
+      if (!sbSession?.access_token) { el.classList.remove('visible'); return; }
+      try {
+        const res = await fetch('/api/saved-books', { headers: getAuthHeaders() });
+        if (!res.ok) { el.classList.remove('visible'); return; }
+        const { books } = await res.json();
+        el.classList.toggle('visible', books.length > 0);
+      } catch { el.classList.remove('visible'); }
+    }
+
+    // Make checkboxes mutually exclusive
+    document.getElementById('searchMyListCheck').addEventListener('change', (e) => {
+      if (e.target.checked) document.getElementById('excludeMyListCheck').checked = false;
+    });
+    document.getElementById('excludeMyListCheck').addEventListener('change', (e) => {
+      if (e.target.checked) document.getElementById('searchMyListCheck').checked = false;
+    });
 
     /* ─── Preferences ──────────────────────────────────── */
     async function loadPreferences() {
@@ -3238,6 +4082,8 @@ vibeTags must be evocative and specific (e.g. "melancholic", "darkly comic", "sl
         if (!res.ok) return;
         const { results } = await res.json();
 
+        // Also populate saved-books cover cache from search results
+        const cache = _getCoverCache();
         results.forEach((data, i) => {
           const card = container.querySelectorAll('.book-card')[i];
           if (!card) return;
@@ -3268,7 +4114,13 @@ vibeTags must be evocative and specific (e.g. "melancholic", "darkly comic", "sl
               card.querySelector('.card-title-link').href = grHref;
             }
           }
+
+          // Cache for saved books page
+          if (books[i]) {
+            cache[_coverCacheKey(books[i].title, books[i].author)] = data;
+          }
         });
+        _setCoverCache(cache);
       } catch {
         container.querySelectorAll('[data-rating="ol"] .rating-val').forEach(el => {
           el.textContent = '\u2014';
@@ -3325,10 +4177,13 @@ vibeTags must be evocative and specific (e.g. "melancholic", "darkly comic", "sl
             pace: parseInt(document.getElementById('pace').value),
           };
 
+          const searchMyList = document.getElementById('searchMyListCheck').checked;
+          const excludeMyList = document.getElementById('excludeMyListCheck').checked;
+
           const res = await fetch('/api/search', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
-            body: JSON.stringify({ queryText: q, filters }),
+            body: JSON.stringify({ queryText: q, filters, searchMyList, excludeMyList }),
           });
 
           if (!res.ok) {
@@ -3367,7 +4222,9 @@ vibeTags must be evocative and specific (e.g. "melancholic", "darkly comic", "sl
         if (!books?.length) throw new Error('No books returned. Please try again.');
 
         const container = document.getElementById('results');
-        renderBooks(books, container, q, false, personalized);
+        const isListSearch = document.getElementById('searchMyListCheck').checked;
+        const sectionTitle = isListSearch ? 'Picked from your reading list' : null;
+        renderBooks(books, container, q, false, personalized, sectionTitle, isListSearch);
         enrichCards(books, container);
 
         const allVibes = books.flatMap(b => b.vibeTags || []).join(' ');
@@ -3387,11 +4244,12 @@ vibeTags must be evocative and specific (e.g. "melancholic", "darkly comic", "sl
     window.findBooks = findBooks;
 
     /* ─── Render book cards ───────────────────────────── */
-    function renderBooks(books, container, query, isLast, personalized = false) {
+    function renderBooks(books, container, query, isLast, personalized = false, sectionTitle = null, fromList = false) {
       const head = document.createElement('div');
       head.className = 'results-head';
+      const title = sectionTitle || (isLast ? 'From your last search' : `${books.length} books chosen for you`);
       head.innerHTML = `
-        <span class="results-title">${isLast ? 'From your last search' : `${books.length} books chosen for you`}</span>
+        <span class="results-title">${title}</span>
         ${personalized && !isLast ? '<span class="personalized-badge">Personalized for you</span>' : ''}
       `;
       container.appendChild(head);
@@ -3446,13 +4304,13 @@ vibeTags must be evocative and specific (e.g. "melancholic", "darkly comic", "sl
               </svg>
               Love this
             </button>
-            <button class="card-action-btn save-btn" data-book-id="${esc(bookId)}" data-title="${esc(b.title)}" data-author="${esc(b.author)}" title="Add to your reading list">
+            <button class="card-action-btn save-btn${fromList ? ' active-save' : ''}" data-book-id="${esc(bookId)}" data-title="${esc(b.title)}" data-author="${esc(b.author)}" title="${fromList ? 'On your reading list' : 'Add to your reading list'}"${fromList ? ' disabled' : ''}>
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M19 21l-7-5-7 5V5a2 2 0 012-2h10a2 2 0 012 2z"/>
               </svg>
-              Save
+              ${fromList ? 'Saved' : 'Save'}
             </button>
-            <div class="card-read-group">
+            ${fromList ? '' : `<div class="card-read-group">
               <span class="card-read-label">Already read this book?</span>
               <div class="card-read-btns">
                 <button class="card-action-btn read-btn" title="I've read this and enjoyed it">
@@ -3470,7 +4328,7 @@ vibeTags must be evocative and specific (e.g. "melancholic", "darkly comic", "sl
                   Did not enjoy
                 </button>
               </div>
-            </div>
+            </div>`}
           </div>
         `;
 
@@ -3511,23 +4369,27 @@ vibeTags must be evocative and specific (e.g. "melancholic", "darkly comic", "sl
         const readBtn = card.querySelector('.read-btn');
         const readNoBtn = card.querySelector('.read-no-btn');
 
-        readBtn.addEventListener('click', () => {
-          if (readBtn.classList.contains('active-read')) return;
-          readBtn.classList.add('active-read');
-          readNoBtn.classList.remove('active-read-no');
-          recordInteraction(b.title, b.author, 'read', b._coverId);
-          toast('Great taste noted!');
-          trackEvent('read', { title: b.title });
-        });
+        if (readBtn) {
+          readBtn.addEventListener('click', () => {
+            if (readBtn.classList.contains('active-read')) return;
+            readBtn.classList.add('active-read');
+            readNoBtn.classList.remove('active-read-no');
+            recordInteraction(b.title, b.author, 'read', b._coverId);
+            toast('Great taste noted!');
+            trackEvent('read', { title: b.title });
+          });
+        }
 
-        readNoBtn.addEventListener('click', () => {
-          if (readNoBtn.classList.contains('active-read-no')) return;
-          readNoBtn.classList.add('active-read-no');
-          readBtn.classList.remove('active-read');
-          recordInteraction(b.title, b.author, 'read-dislike', b._coverId);
-          toast('Got it — we\'ll steer clear of similar books');
-          trackEvent('read-dislike', { title: b.title });
-        });
+        if (readNoBtn) {
+          readNoBtn.addEventListener('click', () => {
+            if (readNoBtn.classList.contains('active-read-no')) return;
+            readNoBtn.classList.add('active-read-no');
+            readBtn.classList.remove('active-read');
+            recordInteraction(b.title, b.author, 'read-dislike', b._coverId);
+            toast('Got it — we\'ll steer clear of similar books');
+            trackEvent('read-dislike', { title: b.title });
+          });
+        }
 
         container.appendChild(card);
         requestAnimationFrame(() => {
