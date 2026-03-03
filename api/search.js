@@ -11,7 +11,7 @@ module.exports = async function handler(req, res) {
   if (auth.error) return res.status(401).json({ error: auth.error });
 
   const { supabase, user } = auth;
-  const { queryText, filters = {}, searchMyList = false, excludeMyList = false } = req.body;
+  const { queryText, filters = {}, searchMyList = false, excludeMyList = false, pastTitles = [] } = req.body;
 
   if (!queryText || typeof queryText !== 'string' || !queryText.trim()) {
     return res.status(400).json({ error: 'queryText is required' });
@@ -108,11 +108,17 @@ Additional preferences:`;
     prompt += `\n\nBooks this reader has disliked (avoid similar):\n${dislikedBooks.slice(0, 5).map(b => `- ${b}`).join('\n')}`;
   }
 
-  // Exclusion list
-  if (excludeBooks.length) {
+  // Exclusion list — merge server history + client localStorage list
+  const allExclusions = [...excludeBooks];
+  if (Array.isArray(pastTitles)) {
+    for (const b of pastTitles) {
+      if (b?.title && b?.author) allExclusions.push({ title: b.title, author: b.author });
+    }
+  }
+  if (allExclusions.length) {
     prompt += `\n\nDo NOT recommend any of these books (already recommended previously):\n`;
     const seen = new Set();
-    for (const b of excludeBooks) {
+    for (const b of allExclusions) {
       const key = `${b.title.toLowerCase()}::${b.author.toLowerCase()}`;
       if (!seen.has(key)) {
         seen.add(key);

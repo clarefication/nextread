@@ -4346,7 +4346,7 @@ vibeTags must be evocative and specific (e.g. "melancholic", "darkly comic", "sl
           const res = await fetch('/api/search', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
-            body: JSON.stringify({ queryText: q, filters, searchMyList, excludeMyList }),
+            body: JSON.stringify({ queryText: q, filters, searchMyList, excludeMyList, pastTitles: getPastRecommendations() }),
           });
 
           if (!res.ok) {
