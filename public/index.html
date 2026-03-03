@@ -4223,7 +4223,7 @@ vibeTags must be evocative and specific (e.g. "melancholic", "darkly comic", "sl
 
         const container = document.getElementById('results');
         const isListSearch = document.getElementById('searchMyListCheck').checked;
-        const sectionTitle = isListSearch ? 'Picked from your reading list' : null;
+        const sectionTitle = isListSearch ? 'We think you should read this next' : null;
         renderBooks(books, container, q, false, personalized, sectionTitle, isListSearch);
         enrichCards(books, container);
 
@@ -4250,7 +4250,7 @@ vibeTags must be evocative and specific (e.g. "melancholic", "darkly comic", "sl
       const title = sectionTitle || (isLast ? 'From your last search' : `${books.length} books chosen for you`);
       head.innerHTML = `
         <span class="results-title">${title}</span>
-        ${personalized && !isLast ? '<span class="personalized-badge">Personalized for you</span>' : ''}
+        ${fromList ? '<span class="personalized-badge">From your reading list</span>' : (personalized && !isLast ? '<span class="personalized-badge">Personalized for you</span>' : '')}
       `;
       container.appendChild(head);
 
