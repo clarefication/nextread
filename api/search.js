@@ -108,15 +108,27 @@ Additional preferences:`;
     prompt += `\n\nBooks this reader has disliked (avoid similar):\n${dislikedBooks.slice(0, 5).map(b => `- ${b}`).join('\n')}`;
   }
 
-  // Exclusion list — merge server history + client localStorage list
-  const allExclusions = [...excludeBooks];
+  // Permanent blocklist — books Claude chronically defaults to
+  const PERMANENT_BLOCKLIST = [
+    { title: 'The Silent Patient', author: 'Alex Michaelides' },
+    { title: 'Gone Girl', author: 'Gillian Flynn' },
+    { title: 'The Girl on the Train', author: 'Paula Hawkins' },
+    { title: 'Where the Crawdads Sing', author: 'Delia Owens' },
+    { title: 'It Ends with Us', author: 'Colleen Hoover' },
+    { title: 'Atomic Habits', author: 'James Clear' },
+    { title: 'The Midnight Library', author: 'Matt Haig' },
+    { title: 'Normal People', author: 'Sally Rooney' },
+  ];
+
+  // Exclusion list — permanent blocklist + server history + client localStorage list
+  const allExclusions = [...PERMANENT_BLOCKLIST, ...excludeBooks];
   if (Array.isArray(pastTitles)) {
     for (const b of pastTitles) {
       if (b?.title && b?.author) allExclusions.push({ title: b.title, author: b.author });
     }
   }
   if (allExclusions.length) {
-    prompt += `\n\nDo NOT recommend any of these books (already recommended previously):\n`;
+    prompt += `\n\nYou are STRICTLY FORBIDDEN from recommending any of these books — do not include them under any circumstances:\n`;
     const seen = new Set();
     for (const b of allExclusions) {
       const key = `${b.title.toLowerCase()}::${b.author.toLowerCase()}`;
@@ -224,7 +236,7 @@ RULES (follow every single one exactly):
 1. Return exactly 3 books. No more, no fewer.
 2. ONLY recommend books you are 100% certain are real, published works. Use the exact title as it appears on the cover. Use the author's real, full name. If you are not completely sure a book exists, do NOT include it.
 3. The "summary" field must be a factually accurate 1\u20132 sentence description of what the book is actually about. Do NOT invent plot details, characters, or settings. Only state facts you are certain of. If unsure of specifics, keep the summary high-level rather than risk inaccuracy.
-4. Do NOT default to the most famous or obvious picks. Think past the first tier of popular recommendations. But never sacrifice accuracy for obscurity \u2014 a well-known book that perfectly fits is better than an obscure one you\u2019re unsure about.
+4. Do NOT default to obvious, overexposed, or overhyped picks. Dig past the first tier — imagine a well-read independent bookseller making a thoughtful personal recommendation, not an algorithm surfacing the bestseller list. A lesser-known book that fits perfectly beats a famous one that merely fits adequately.
 5. Every recommendation must feel intentional and personal, not algorithmic.
 6. Each book must be a distinct, different recommendation. Never repeat authors across picks.
 
