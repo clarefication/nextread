@@ -783,7 +783,11 @@
       flex-wrap: wrap;
       gap: 10px;
       margin-bottom: 28px;
+      opacity: 0;
+      transform: translateY(16px);
+      transition: opacity 0.5s cubic-bezier(0.16, 1, 0.3, 1), transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
     }
+    .results-head.in { opacity: 1; transform: translateY(0); }
 
     .results-title {
       font-family: var(--f-display);
@@ -809,10 +813,10 @@
       position: relative;
       overflow: hidden;
       opacity: 0;
-      transform: translateY(18px);
-      transition: opacity .45s ease, transform .45s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+      transform: translateY(90px) scale(0.92);
+      transition: opacity 1s cubic-bezier(0.16, 1, 0.3, 1), transform 1s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s ease, border-color 0.3s ease;
     }
-    .book-card.in { opacity: 1; transform: translateY(0); }
+    .book-card.in { opacity: 1; transform: translateY(0) scale(1); }
     .book-card:hover {
       box-shadow:
         inset 0 1px 0 rgba(255, 200, 150, 0.14),
@@ -871,7 +875,16 @@
       height: auto;
       display: none;
       border-radius: 8px;
-      box-shadow: 0 10px 40px var(--c-shadow-md);
+      box-shadow:
+        0 8px 32px rgba(0, 0, 0, 0.55),
+        0 20px 60px rgba(0, 0, 0, 0.35),
+        0 4px 16px rgba(224, 120, 72, 0.10);
+    }
+    .card-cover-wrap a:hover .cover-img {
+      box-shadow:
+        0 12px 40px rgba(0, 0, 0, 0.65),
+        0 24px 72px rgba(0, 0, 0, 0.40),
+        0 6px 20px rgba(224, 120, 72, 0.16);
     }
 
     /* ─── Card header (centred) ──────────────────────── */
@@ -970,8 +983,9 @@
     /* ─── Card body text ─────────────────────────────── */
     .card-rule {
       height: 1px;
-      background: var(--c-border);
+      background: linear-gradient(90deg, transparent, var(--c-border) 25%, var(--c-border) 75%, transparent);
       margin: 18px 0;
+      border: none;
     }
 
     .card-summary {
@@ -982,6 +996,24 @@
       margin-bottom: 18px;
     }
 
+    .card-match-wrap {
+      background: rgba(224, 120, 72, 0.05);
+      border-radius: var(--r-sm);
+      padding: 14px 18px;
+      margin-bottom: 20px;
+      position: relative;
+    }
+    .card-match-wrap::before {
+      content: '\201C';
+      position: absolute;
+      top: 4px; left: 14px;
+      font-family: var(--f-display);
+      font-size: 2.5rem;
+      line-height: 1;
+      color: rgba(224, 120, 72, 0.25);
+      pointer-events: none;
+    }
+
     .card-match-label {
       display: block;
       font-size: 0.62rem;
@@ -989,7 +1021,7 @@
       letter-spacing: 0.14em;
       text-transform: uppercase;
       color: var(--c-amber);
-      margin-bottom: 6px;
+      margin-bottom: 4px;
     }
 
     .card-match {
@@ -999,7 +1031,8 @@
       font-weight: 400;
       line-height: 1.49;
       color: var(--c-ink);
-      margin-bottom: 20px;
+      margin-bottom: 0;
+      padding-left: 18px;
     }
 
     .vibe-tags {
@@ -1013,15 +1046,16 @@
       font-weight: 400;
       letter-spacing: 0.04em;
       color: var(--c-ink-soft);
-      background: var(--c-bg-dim);
-      border: 1px solid var(--c-border);
+      background: rgba(224, 120, 72, 0.06);
+      border: 1px solid rgba(224, 120, 72, 0.15);
       border-radius: 100px;
       padding: 4px 14px;
       transition: all var(--ease);
     }
     .vibe-tag:hover {
-      border-color: var(--c-ink-faint);
-      color: var(--c-ink-mid);
+      background: rgba(224, 120, 72, 0.10);
+      border-color: rgba(224, 120, 72, 0.28);
+      color: var(--c-amber);
     }
 
     /* ─── Last search ────────────────────────────────── */
@@ -1769,6 +1803,31 @@
     .search-list-check:has(input:checked) { color: var(--c-ink); }
 
     /* ─── Preferences view ─────────────────────────────── */
+    #preferencesContent {
+      background: rgba(12, 7, 3, 0.45);
+      backdrop-filter: blur(32px) saturate(1.6) brightness(0.88);
+      -webkit-backdrop-filter: blur(32px) saturate(1.6) brightness(0.88);
+      border: 1px solid rgba(255, 185, 120, 0.07);
+      border-top-color: rgba(255, 200, 150, 0.16);
+      border-radius: var(--r);
+      padding: 40px 40px 32px;
+      box-shadow:
+        inset 0 1px 0 rgba(255, 200, 150, 0.09),
+        inset 0 -1px 0 rgba(0, 0, 0, 0.20),
+        0 4px 30px var(--c-shadow);
+      position: relative;
+      overflow: hidden;
+    }
+    #preferencesContent::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 12%; right: 12%;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(255, 215, 165, 0.45), transparent);
+      pointer-events: none;
+    }
+    @media (max-width: 560px) { #preferencesContent { padding: 28px 20px 24px; } }
+
     .pref-section {
       margin-bottom: 32px;
     }
@@ -1829,22 +1888,25 @@
       margin-bottom: 48px;
     }
     .pref-save-btn {
-      font-family: var(--f-body);
-      font-size: 0.9rem;
-      font-weight: 500;
-      color: var(--c-bg);
-      background: var(--c-amber);
-      border: none;
-      border-radius: var(--r-sm);
-      padding: 12px 32px;
+      font-family: var(--f-display);
+      font-style: italic;
+      font-size: 1.05rem;
+      font-weight: 400;
+      letter-spacing: 0.02em;
+      color: var(--c-amber);
+      background: transparent;
+      border: 1.5px solid var(--c-amber);
+      border-radius: 999px;
+      padding: 12px 36px;
       cursor: pointer;
       transition: all var(--ease);
     }
-    .pref-save-btn:hover {
-      background: #E0AD5E;
+    .pref-save-btn:hover:not(:disabled) {
+      background: var(--c-amber-faint);
       transform: translateY(-1px);
-      box-shadow: 0 8px 28px rgba(212, 160, 84, 0.3);
+      box-shadow: 0 8px 28px var(--c-amber-glow);
     }
+    .pref-save-btn:active:not(:disabled) { transform: translateY(0); }
     .pref-save-btn:disabled { opacity: .5; cursor: not-allowed; }
 
     .read-books-list { display: flex; flex-direction: column; gap: 10px; margin-top: 8px; }
@@ -2137,24 +2199,45 @@
     /* ─── Card action buttons ──────────────────────── */
     .card-actions {
       display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
+      align-items: center;
+      gap: 16px;
       margin-top: 18px;
       padding-top: 16px;
       border-top: 1px solid var(--c-border);
     }
+    .card-actions-divider {
+      width: 1px;
+      height: 36px;
+      background: var(--c-border);
+      flex-shrink: 0;
+    }
+    .card-reaction-group {
+      display: flex;
+      gap: 8px;
+    }
     .card-read-group {
       display: flex;
+      flex-direction: row;
       align-items: center;
       gap: 8px;
     }
     .card-read-btns {
       display: flex;
-      gap: 8px;
+      gap: 6px;
+    }
+    .card-read-label {
+      font-size: 0.65rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      white-space: nowrap;
     }
     @media (max-width: 640px) {
-      .card-actions { justify-content: center; }
-      .card-read-group { flex-direction: column; align-items: center; width: 100%; }
+      .card-actions {
+        flex-direction: column;
+        gap: 12px;
+      }
+      .card-actions-divider { display: none; }
+      .card-reaction-group { justify-content: center; }
     }
 
     .card-action-btn {
@@ -2188,11 +2271,7 @@
       background: var(--c-amber-faint);
     }
     .card-read-label {
-      display: flex;
-      align-items: center;
-      font-size: 0.72rem;
       color: var(--c-ink-soft);
-      white-space: nowrap;
     }
     .card-action-btn.active-read {
       color: var(--c-sage);
@@ -2547,7 +2626,7 @@
       <div class="welcome-rule"></div>
       <p class="welcome-body">That feeling between finishing one book and not knowing what to read next — we've got you. Tell us how you're feeling, and we'll find the book that meets you there — a quiet companion, a jolt of energy, or a world to disappear into.</p>
       <div class="welcome-actions">
-        <button class="btn-primary welcome-enter" onclick="dismissWelcome()">Start browsing</button>
+        <button class="btn-primary welcome-enter" onclick="dismissWelcome()" id="welcomeBtn">Find my next read</button>
         <label class="welcome-dismiss-label">
           <input type="checkbox" id="welcomeDontShow"> Don't show this again
         </label>
@@ -4008,6 +4087,8 @@
 
       // Show welcome popup if not dismissed
       if (!localStorage.getItem('betweenbooks_welcome_dismissed')) {
+        const welcomePhrases = ['Find my next read', "I'm ready", 'Get me reading', "Let's go", "I'm between books"];
+        document.getElementById('welcomeBtn').textContent = welcomePhrases[Math.floor(Math.random() * welcomePhrases.length)];
         document.getElementById('welcomeOverlay').classList.add('show');
       }
     });
@@ -4245,7 +4326,7 @@ vibeTags must be evocative and specific (e.g. "melancholic", "darkly comic", "sl
         const container = document.getElementById('results');
         const isListSearch = document.getElementById('searchMyListCheck').checked;
         const sectionTitle = isListSearch ? 'We think you should read this next' : null;
-        renderBooks(books, container, q, false, personalized, sectionTitle, isListSearch);
+        renderBooks(books, container, q, false, personalized, sectionTitle, isListSearch, 700);
         enrichCards(books, container);
 
         const allVibes = books.flatMap(b => b.vibeTags || []).join(' ');
@@ -4265,7 +4346,7 @@ vibeTags must be evocative and specific (e.g. "melancholic", "darkly comic", "sl
     window.findBooks = findBooks;
 
     /* ─── Render book cards ───────────────────────────── */
-    function renderBooks(books, container, query, isLast, personalized = false, sectionTitle = null, fromList = false) {
+    function renderBooks(books, container, query, isLast, personalized = false, sectionTitle = null, fromList = false, startDelay = 0) {
       const head = document.createElement('div');
       head.className = 'results-head';
       const title = sectionTitle || (isLast ? 'From your last search' : `${books.length} books chosen for you`);
@@ -4274,6 +4355,7 @@ vibeTags must be evocative and specific (e.g. "melancholic", "darkly comic", "sl
         ${fromList ? '<span class="personalized-badge">From your reading list</span>' : (personalized && !isLast ? '<span class="personalized-badge">Personalized for you</span>' : '')}
       `;
       container.appendChild(head);
+      requestAnimationFrame(() => setTimeout(() => head.classList.add('in'), startDelay + (isLast ? 0 : 60)));
 
       books.forEach((b, i) => {
         const card = document.createElement('div');
@@ -4314,39 +4396,44 @@ vibeTags must be evocative and specific (e.g. "melancholic", "darkly comic", "sl
           <div class="card-rule"></div>
           <p class="card-summary">${esc(b.summary || '')}</p>
           ${b.whyThisMatchesYou ? `
-            <span class="card-match-label">Why this matches you</span>
-            <p class="card-match">${esc(b.whyThisMatchesYou)}</p>
+            <div class="card-match-wrap">
+              <span class="card-match-label">Why this matches you</span>
+              <p class="card-match">${esc(b.whyThisMatchesYou)}</p>
+            </div>
           ` : ''}
           ${tags ? `<div class="vibe-tags">${tags}</div>` : ''}
           <div class="card-actions">
-            <button class="card-action-btn like-btn" data-book-id="${esc(bookId)}" data-title="${esc(b.title)}" data-author="${esc(b.author)}" title="Trains your taste for better picks">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/>
-              </svg>
-              Love this
-            </button>
-            <button class="card-action-btn save-btn${fromList ? ' active-save' : ''}" data-book-id="${esc(bookId)}" data-title="${esc(b.title)}" data-author="${esc(b.author)}" title="${fromList ? 'On your reading list' : 'Add to your reading list'}"${fromList ? ' disabled' : ''}>
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M19 21l-7-5-7 5V5a2 2 0 012-2h10a2 2 0 012 2z"/>
-              </svg>
-              ${fromList ? 'Saved' : 'Save'}
-            </button>
-            ${fromList ? '' : `<div class="card-read-group">
-              <span class="card-read-label">Already read this book?</span>
+            <div class="card-reaction-group">
+              <button class="card-action-btn like-btn" data-book-id="${esc(bookId)}" data-title="${esc(b.title)}" data-author="${esc(b.author)}" title="Trains your taste for better picks">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/>
+                </svg>
+                Love this
+              </button>
+              <button class="card-action-btn save-btn${fromList ? ' active-save' : ''}" data-book-id="${esc(bookId)}" data-title="${esc(b.title)}" data-author="${esc(b.author)}" title="${fromList ? 'On your reading list' : 'Add to your reading list'}"${fromList ? ' disabled' : ''}>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M19 21l-7-5-7 5V5a2 2 0 012-2h10a2 2 0 012 2z"/>
+                </svg>
+                ${fromList ? 'Saved' : 'Save'}
+              </button>
+            </div>
+            ${fromList ? '' : `<div class="card-actions-divider"></div>
+            <div class="card-read-group">
+              <span class="card-read-label">Read it?</span>
               <div class="card-read-btns">
                 <button class="card-action-btn read-btn" title="I've read this and enjoyed it">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
                     <path d="M14 9V5a3 3 0 00-3-3l-4 9v11h11.28a2 2 0 002-1.7l1.38-9a2 2 0 00-2-2.3H14z"/>
                     <path d="M7 22H4a2 2 0 01-2-2v-7a2 2 0 012-2h3"/>
                   </svg>
-                  Yes, loved it
+                  Loved it
                 </button>
                 <button class="card-action-btn read-no-btn" title="I've read this but didn't enjoy it">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
                     <path d="M10 15v4a3 3 0 003 3l4-9V2H5.72a2 2 0 00-2 1.7l-1.38 9a2 2 0 002 2.3H10z"/>
                     <path d="M17 2h2.67A2.31 2.31 0 0122 4v7a2.31 2.31 0 01-2.33 2H17"/>
                   </svg>
-                  Did not enjoy
+                  Not for me
                 </button>
               </div>
             </div>`}
@@ -4413,10 +4500,22 @@ vibeTags must be evocative and specific (e.g. "melancholic", "darkly comic", "sl
         }
 
         container.appendChild(card);
-        requestAnimationFrame(() => {
-          setTimeout(() => card.classList.add('in'), isLast ? 60 * i : 90 * i);
-        });
       });
+
+      // Animate cards as they enter the viewport
+      const observer = new IntersectionObserver((entries) => {
+        const visible = entries
+          .filter(e => e.isIntersecting)
+          .sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top);
+        visible.forEach((entry, i) => {
+          setTimeout(() => entry.target.classList.add('in'), i * 150);
+          observer.unobserve(entry.target);
+        });
+      }, { threshold: 0.08, rootMargin: '0px 0px -40px 0px' });
+
+      setTimeout(() => {
+        container.querySelectorAll('.book-card:not(.in)').forEach(c => observer.observe(c));
+      }, startDelay);
     }
 
     /* ─── Last search ─────────────────────────────────── */
@@ -4434,7 +4533,6 @@ vibeTags must be evocative and specific (e.g. "melancholic", "darkly comic", "sl
         renderBooks(books, el, q, true);
         enrichCards(books, el);
 
-        setTimeout(() => el.querySelectorAll('.book-card').forEach(c => c.classList.add('in')), 80);
         document.getElementById('lastSearch').classList.add('show');
       } catch { /* ignore */ }
     }
