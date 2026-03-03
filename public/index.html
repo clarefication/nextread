@@ -380,6 +380,7 @@
       font-family: var(--f-display);
       font-size: 1.4rem;
       font-weight: 400;
+      font-style: italic;
       color: var(--c-ink);
       display: block;
       margin-bottom: 16px;
@@ -428,6 +429,48 @@
       color: var(--c-ink-soft);
       white-space: nowrap;
     }
+
+    /* ─── Refine panel toggle ───────────────────────── */
+    .refine-toggle {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      width: 100%;
+      background: none;
+      border: none;
+      font-family: var(--f-body);
+      font-size: 0.68rem;
+      font-weight: 500;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--c-ink-soft);
+      cursor: pointer;
+      padding: 10px 0;
+      margin: 16px 0 0;
+      transition: color var(--ease);
+    }
+    .refine-toggle:hover { color: var(--c-ink-mid); }
+    .refine-toggle::before,
+    .refine-toggle::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--c-border);
+    }
+    .refine-toggle svg {
+      flex-shrink: 0;
+      transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .refine-toggle.open svg { transform: rotate(180deg); }
+
+    .refine-panel {
+      display: grid;
+      grid-template-rows: 0fr;
+      transition: grid-template-rows 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .refine-panel.open { grid-template-rows: 1fr; }
+    .refine-panel-inner { overflow: hidden; }
 
     /* ─── Filters grid ──────────────────────────────── */
     .filters-grid {
@@ -2657,75 +2700,84 @@
         placeholder="Describe what you feel like reading — for example, something introspective, slightly sad, strong female lead, not too heavy"
       ></textarea>
 
-      <div class="divider"><span>Refine your search</span></div>
+      <button class="refine-toggle" id="refineToggle" type="button" onclick="toggleRefine()">
+        Refine my search
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+      </button>
 
-      <div class="filters-grid">
+      <div class="refine-panel" id="refinePanel">
+        <div class="refine-panel-inner">
 
-        <div class="filter-group">
-          <label for="minRating">Min Rating (Open Library)</label>
-          <select id="minRating">
-            <option value="">Any rating</option>
-            <option value="3.0">3.0+</option>
-            <option value="3.5" selected>3.5+</option>
-            <option value="4.0">4.0+</option>
-            <option value="4.5">4.5+</option>
-          </select>
-        </div>
+          <div class="filters-grid" style="margin-top:20px">
 
-        <div class="filter-group">
-          <label for="maxPages">Max Page Count</label>
-          <input type="number" id="maxPages" placeholder="e.g. 350" min="50" max="2000" />
-        </div>
+            <div class="filter-group">
+              <label for="minRating">Min Rating (Open Library)</label>
+              <select id="minRating">
+                <option value="">Any rating</option>
+                <option value="3.0">3.0+</option>
+                <option value="3.5" selected>3.5+</option>
+                <option value="4.0">4.0+</option>
+                <option value="4.5">4.5+</option>
+              </select>
+            </div>
 
-        <div class="filter-group genre-row">
-          <label>Genre <span style="font-style:italic; font-weight:200; text-transform:none; letter-spacing:0">(pick any)</span></label>
-          <div class="chips" id="genreChips">
-            <span class="chip" data-g="Fiction">Fiction</span>
-            <span class="chip" data-g="Non-fiction">Non-fiction</span>
-            <span class="chip" data-g="Literary Fiction">Literary Fiction</span>
-            <span class="chip" data-g="Romance">Romance</span>
-            <span class="chip" data-g="Thriller">Thriller</span>
-            <span class="chip" data-g="Mystery">Mystery</span>
-            <span class="chip" data-g="Fantasy">Fantasy</span>
-            <span class="chip" data-g="Sci-fi">Sci-fi</span>
-            <span class="chip" data-g="Historical">Historical</span>
-            <span class="chip" data-g="Essay Collection">Essay Collection</span>
+            <div class="filter-group">
+              <label for="maxPages">Max Page Count</label>
+              <input type="number" id="maxPages" placeholder="e.g. 350" min="50" max="2000" />
+            </div>
+
+            <div class="filter-group genre-row">
+              <label>Genre <span style="font-style:italic; font-weight:200; text-transform:none; letter-spacing:0">(pick any)</span></label>
+              <div class="chips" id="genreChips">
+                <span class="chip" data-g="Fiction">Fiction</span>
+                <span class="chip" data-g="Non-fiction">Non-fiction</span>
+                <span class="chip" data-g="Literary Fiction">Literary Fiction</span>
+                <span class="chip" data-g="Romance">Romance</span>
+                <span class="chip" data-g="Thriller">Thriller</span>
+                <span class="chip" data-g="Mystery">Mystery</span>
+                <span class="chip" data-g="Fantasy">Fantasy</span>
+                <span class="chip" data-g="Sci-fi">Sci-fi</span>
+                <span class="chip" data-g="Historical">Historical</span>
+                <span class="chip" data-g="Essay Collection">Essay Collection</span>
+              </div>
+            </div>
+
           </div>
-        </div>
 
-      </div>
+          <div class="sliders">
+            <div class="divider" style="margin-top:4px"><span>Tone & Pace</span></div>
 
-      <div class="sliders">
-        <div class="divider" style="margin-top:4px"><span>Tone & Pace</span></div>
+            <div class="slider-row">
+              <div class="slider-ends">
+                <span class="slider-end">Light</span>
+                <span class="slider-end">Heavy</span>
+              </div>
+              <input type="range" id="tone" min="1" max="5" value="3">
+            </div>
 
-        <div class="slider-row">
-          <div class="slider-ends">
-            <span class="slider-end">Light</span>
-            <span class="slider-end">Heavy</span>
+            <div class="slider-row" style="margin-bottom:0">
+              <div class="slider-ends">
+                <span class="slider-end">Fast-paced</span>
+                <span class="slider-end">Slow &amp; reflective</span>
+              </div>
+              <input type="range" id="pace" min="1" max="5" value="3">
+            </div>
           </div>
-          <input type="range" id="tone" min="1" max="5" value="3">
-        </div>
 
-        <div class="slider-row" style="margin-bottom:0">
-          <div class="slider-ends">
-            <span class="slider-end">Fast-paced</span>
-            <span class="slider-end">Slow &amp; reflective</span>
+          <div class="search-list-options" id="searchListOptions">
+            <label class="search-list-check">
+              <input type="checkbox" id="searchMyListCheck">
+              <span class="check-box"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>
+              Search my reading list only
+            </label>
+            <label class="search-list-check">
+              <input type="checkbox" id="excludeMyListCheck">
+              <span class="check-box"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>
+              Exclude books from my reading list
+            </label>
           </div>
-          <input type="range" id="pace" min="1" max="5" value="3">
-        </div>
-      </div>
 
-      <div class="search-list-options" id="searchListOptions">
-        <label class="search-list-check">
-          <input type="checkbox" id="searchMyListCheck">
-          <span class="check-box"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>
-          Search my reading list only
-        </label>
-        <label class="search-list-check">
-          <input type="checkbox" id="excludeMyListCheck">
-          <span class="check-box"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>
-          Exclude books from my reading list
-        </label>
+        </div>
       </div>
 
       <div class="actions">
@@ -4113,6 +4165,15 @@
       trackEvent('surprise_me');
     }
     window.surpriseMe = surpriseMe;
+
+    /* ─── Refine panel toggle ─────────────────────────── */
+    function toggleRefine() {
+      const panel = document.getElementById('refinePanel');
+      const toggle = document.getElementById('refineToggle');
+      const isOpen = panel.classList.toggle('open');
+      toggle.classList.toggle('open', isOpen);
+    }
+    window.toggleRefine = toggleRefine;
 
     /* ─── Slider labels ───────────────────────────────── */
     const TONE_LABELS = ['Very light', 'Light', 'Balanced', 'Heavy', 'Very heavy'];
