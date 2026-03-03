@@ -2645,7 +2645,7 @@
             ? `<img class="saved-cover" src="${esc(b.cover_url)}" alt="">`
             : `<div class="saved-cover-placeholder"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--c-ink-faint)" stroke-width="1.3"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg></div>`;
 
-          const grSearch = `https://www.goodreads.com/search?q=${encodeURIComponent(b.title + ' ' + b.author)}`;
+          const grSearch = `https://www.goodreads.com/search?q=${encodeURIComponent(b.title + ' ' + b.author)}&search_type=books&search[field]=on`;
           const amzSearch = `https://www.amazon.com/s?k=${encodeURIComponent(b.title + ' ' + b.author)}&i=stripbooks&tag=nextreadapp-22`;
 
           card.innerHTML = `
@@ -2710,9 +2710,10 @@
           if (isbn) {
             const amzLink = cards[i].querySelector('.amazon-link');
             if (amzLink) amzLink.href = `https://www.amazon.com/dp/${data.isbn10 || data.isbn13}?tag=nextreadapp-22`;
-            if (data.isbn13) {
+            const grIsbn = data.isbn13 || data.isbn10;
+            if (grIsbn) {
               const grLink = cards[i].querySelector('.goodreads-link');
-              if (grLink) grLink.href = `https://www.goodreads.com/book/isbn/${data.isbn13}`;
+              if (grLink) grLink.href = `https://www.goodreads.com/search?q=${grIsbn}&search_type=books&search[field]=on`;
             }
           }
         });
@@ -3258,8 +3259,9 @@ vibeTags must be evocative and specific (e.g. "melancholic", "darkly comic", "sl
           if (isbn && data.olCover) {
             const amzHref = `https://www.amazon.com/dp/${data.isbn10 || data.isbn13}?tag=nextreadapp-22`;
             card.querySelector('.amazon-link').href = amzHref;
-            if (data.isbn13) {
-              const grHref = `https://www.goodreads.com/book/isbn/${data.isbn13}`;
+            const grIsbn = data.isbn13 || data.isbn10;
+            if (grIsbn) {
+              const grHref = `https://www.goodreads.com/search?q=${grIsbn}&search_type=books&search[field]=on`;
               card.querySelector('.goodreads-link').href  = grHref;
               card.querySelector('.cover-link').href      = grHref;
               card.querySelector('.card-title-link').href = grHref;
@@ -3398,7 +3400,7 @@ vibeTags must be evocative and specific (e.g. "melancholic", "darkly comic", "sl
         card.className = 'book-card';
 
         const tags = (b.vibeTags || []).map(t => `<span class="vibe-tag">${esc(t)}</span>`).join('');
-        const goodreadsHref = `https://www.goodreads.com/search?q=${encodeURIComponent(b.title + ' ' + b.author)}`;
+        const goodreadsHref = `https://www.goodreads.com/search?q=${encodeURIComponent(b.title + ' ' + b.author)}&search_type=books&search[field]=on`;
         const amazonHref    = `https://www.amazon.com/s?k=${encodeURIComponent(b.title + ' ' + b.author)}&i=stripbooks&tag=nextreadapp-22`;
         const bookId = `${b.title}::${b.author}`.toLowerCase().replace(/[^a-z0-9]+/g, '-');
 
